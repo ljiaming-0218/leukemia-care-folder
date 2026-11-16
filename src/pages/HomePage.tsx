@@ -10,35 +10,49 @@ import { policyResources } from "@/src/data/policies/resources";
 import { stories } from "@/src/data/stories";
 import { StoryCard } from "@/src/components/StoryCard";
 
-const entries = [
+const steps = [
   {
     to: "/learn",
     index: "01",
-    title: "认识白血病",
-    desc: "先用知识图谱看清概念关系，再按处境读七张主题卡，需要查词时进术语表。",
+    title: "看懂病",
+    desc: "用知识图谱看清分型、检查和治疗阶段，复制要问医生的问题。",
     go: "去科普页",
   },
   {
-    to: "/resources",
+    to: "/stories",
     index: "02",
-    title: "查医保和救助",
-    desc: "按全国制度、浙江和景宁筛选，先确认参保地，再查办理入口和原文。",
-    go: "去资料库",
+    title: "看看同路人",
+    desc: "公开报道里的家庭怎么面对异地求医、费用、复学和照护。",
+    go: "读故事",
+  },
+  {
+    to: "/route",
+    index: "03",
+    title: "排好我家的路线",
+    desc: "选参保地和就医地，按顺序列出医保结算、救助和公益项目要办的事。",
+    go: "排路线",
   },
   {
     to: "/receipts",
-    index: "03",
-    title: "整理票据",
-    desc: "把发票、费用清单和结算单归到同一次就诊，看清每一笔支出。",
-    go: "看整理方式",
+    index: "04",
+    title: "算清账",
+    desc: "导入发票、费用清单和结算单，归成一次次就诊，每个数字都能回到原件。",
+    go: "导入票据",
   },
   {
-    to: "/stories",
-    index: "04",
-    title: "看看同路人",
-    desc: "来自公开报道的七个家庭，记录他们怎么面对异地求医、费用、复学和照护安排。",
-    go: "读故事",
+    to: "/prepare",
+    index: "05",
+    title: "去申请",
+    desc: "按救助项目逐项准备材料；需要公开求助时，从账本生成可核对的说明草稿。",
+    go: "准备材料",
   },
+];
+
+const moreLinks = [
+  { to: "/resources", label: "医保和救助资料库" },
+  { to: "/ledger", label: "家庭费用账本" },
+  { to: "/fundraising", label: "筹款准备" },
+  { to: "/about", label: "资料来源与隐私说明" },
 ];
 
 export default function HomePage() {
@@ -54,7 +68,7 @@ export default function HomePage() {
           <p className="eyebrow">儿童白血病就医资料夹</p>
           <h1 className="page-title">把看不懂的，变成能问、能查、能带走的一页</h1>
           <p className="lead">
-            服务已确诊儿童白血病的家庭：用知识图谱看懂术语，按参保地查清医保和救助，再把每一次就诊的票据与申请材料整理在一起。
+            服务全国已确诊儿童白血病的家庭：看懂病，看看同路人怎么走，按参保地排好要办的事，把票据算清楚，再带着能核对的材料去申请。
           </p>
 
           <div className="hero__stats" aria-label="站内内容概况">
@@ -91,7 +105,7 @@ export default function HomePage() {
             <b>{isDemo ? "演示工作区" : "真实工作区"}</b>
             <p>
               {isDemo
-                ? "正在查看景宁家庭的虚构票据与账目，修改不会影响真实资料。"
+                ? "正在查看示例家庭（参保地设为浙江景宁）的虚构票据与账目，修改不会影响真实资料。"
                 : `票据、账目和材料只在这台设备上。${localStoreNote(storageStatus, false)}`}
             </p>
           </div>
@@ -125,23 +139,34 @@ export default function HomePage() {
         <div className="section__head">
           <div>
             <h2 className="section__title" id="entries-title">
-              从哪里开始
+              一条线走下来
             </h2>
-            <p className="section__note">不确定看哪一块？先选最接近你现在处境的一项。</p>
+            <p className="section__note">五步按顺序排好，也可以直接从你现在卡住的那一步开始。</p>
           </div>
         </div>
-        <div className="grid-entries">
-          {entries.map((entry) => (
-            <Link key={entry.title} to={entry.to} className="entry-card">
-              <span className="entry-card__index">{entry.index}</span>
-              <span className="entry-card__title">{entry.title}</span>
-              <span className="entry-card__desc">{entry.desc}</span>
-              <span className="entry-card__go">{entry.go} →</span>
-            </Link>
+        <ol className="grid-entries grid-entries--steps">
+          {steps.map((step) => (
+            <li key={step.title}>
+              <Link to={step.to} className="entry-card">
+                <span className="entry-card__index">第 {step.index} 步</span>
+                <span className="entry-card__title">{step.title}</span>
+                <span className="entry-card__desc">{step.desc}</span>
+                <span className="entry-card__go">{step.go} →</span>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ol>
+        <p className="home-more-links">
+          其他入口：
+          {moreLinks.map((item, index) => (
+            <span key={item.to}>
+              {index > 0 && <span aria-hidden="true"> · </span>}
+              <Link to={item.to}>{item.label}</Link>
+            </span>
+          ))}
+        </p>
         <p className="home-demo-note">
-          想先看效果？首页上方的工作区可以载入景宁家庭的虚构示例；演示与真实资料分开保存，可随时退出。
+          想先看效果？首页上方的工作区可以载入一个虚构示例家庭；演示与真实资料分开保存，可随时退出。
         </p>
       </section>
 
@@ -168,23 +193,33 @@ export default function HomePage() {
         <div className="section__head">
           <div>
             <h2 className="section__title" id="example-title">
-              一个景宁家庭会怎么用
+              示例：一个虚构家庭怎么走完这条线
             </h2>
-            <p className="section__note">示例情境，费用与票据均为虚构数据。</p>
+            <p className="section__note">
+              演示把参保地设为浙江景宁，只是为了带出一个真实存在的地方救助项目；费用与票据均为虚构数据。换成你家的参保地，路线和资料会跟着变。
+            </p>
           </div>
         </div>
-        <ol className="flow">
+        <ol className="flow flow--five">
           <li>
-            <b>先学会怎么问</b>
-            <span>在知识图谱里点开「骨髓穿刺」，再复制「骨髓检查、免疫分型、基因检测有什么区别」去问医生。</span>
+            <b>看懂病</b>
+            <span>在知识图谱里点开「骨髓穿刺」，复制「骨髓检查、免疫分型、基因检测有什么区别」去问医生。</span>
           </li>
           <li>
-            <b>再查入口</b>
-            <span>确认参保地是景宁，查看浙江门诊特殊病种和第五期「小鹿灯」的原文与办理入口。</span>
+            <b>看同路人</b>
+            <span>读一篇异地求医家庭的报道，记下他们先办了哪些手续、保留了哪些票据。</span>
           </li>
           <li>
-            <b>最后整理票据</b>
-            <span>把住院发票和同次医保结算单归成一次就诊，再到提交准备页逐份保存原件。</span>
+            <b>排路线</b>
+            <span>选参保地，列出全国医保制度、浙江门诊特殊病种和当地「小鹿灯」各要办什么。</span>
+          </li>
+          <li>
+            <b>算清账</b>
+            <span>把住院发票和同次医保结算单归成一次就诊，外购药和基因检测各记一笔，读出每类已支付金额。</span>
+          </li>
+          <li>
+            <b>去申请</b>
+            <span>到提交准备页对照费用时间段，逐份关联原件，再按官方入口要求自行提交。</span>
           </li>
         </ol>
       </section>

@@ -2,14 +2,14 @@ import { NavLink } from "react-router-dom";
 
 const navItems = [
   { to: "/", label: "首页", end: true },
-  { to: "/learn", label: "白血病科普" },
-  { to: "/resources", label: "医保和救助" },
-  { to: "/route", label: "我家的路线" },
+  { to: "/learn", label: "看懂病" },
   { to: "/stories", label: "同路人" },
-  { to: "/fundraising", label: "筹款准备" },
+  { to: "/route", label: "我家的路线" },
+  { to: "/resources", label: "医保和救助" },
   { to: "/receipts", label: "票据导入" },
   { to: "/ledger", label: "家庭费用" },
   { to: "/prepare", label: "提交准备" },
+  { to: "/fundraising", label: "筹款准备" },
   { to: "/about", label: "说明" },
 ];
 
@@ -31,7 +31,7 @@ export function SiteHeader() {
           </span>
           <span>
             <span className="brand__title">儿童白血病就医资料夹</span>
-            <span className="brand__sub">术语 · 医保 · 票据 · 材料</span>
+            <span className="brand__sub">看懂病 · 同路人 · 路线 · 算账 · 申请</span>
           </span>
         </NavLink>
         <nav className="site-nav" aria-label="主要页面">
