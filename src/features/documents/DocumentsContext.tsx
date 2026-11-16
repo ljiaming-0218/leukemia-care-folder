@@ -22,6 +22,7 @@ import { canRecognize, disposeRecognition, extractDocument } from "../../documen
 import { mergeParsedFields, parsePages } from "../../document/parse";
 import { sha256File } from "../../document/sha256";
 import { cancelOcr } from "../../document/ocr";
+import { loadRecords, writeRecords } from "../../lib/localStore";
 import { useWorkspace, type WorkspaceMode } from "../workspace/WorkspaceContext";
 
 export const MAX_BATCH_FILES = 20;
@@ -75,6 +76,26 @@ function isSupportedArchiveType(value: string): value is ArchiveType {
   return (archiveTypes as readonly string[]).includes(value);
 }
 
+type StoredDocument = Omit<LocalDocument, "previewUrl" | "progress" | "progressLabel"> & {
+  order: number;
+};
+
+function toStored(doc: LocalDocument, order: number): StoredDocument {
+  const { previewUrl: _previewUrl, progress: _progress, progressLabel: _label, ...rest } = doc;
+  const interrupted = rest.ocrState === "识别中" || rest.ocrState === "待识别";
+  return { ...rest, ocrState: interrupted ? "待识别" : rest.ocrState, order };
+}
+
+function fromStored(stored: StoredDocument): LocalDocument {
+  const { order: _order, ...rest } = stored;
+  return {
+    ...rest,
+    previewUrl: rest.previewKind === "image" ? URL.createObjectURL(rest.file) : null,
+    progress: 0,
+    progressLabel: "",
+  };
+}
+
 export function DocumentsProvider({ children }: { children: ReactNode }) {
   const { mode } = useWorkspace();
   const [docsByMode, setDocsByMode] = useState<Record<WorkspaceMode, LocalDocument[]>>({
@@ -98,6 +119,45 @@ export function DocumentsProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const [hydrated, setHydrated] = useState(false);
+  const savedRef = useRef<Map<string, { doc: LocalDocument; order: number }>>(new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadRecords<StoredDocument>().then((records) => {
+      if (cancelled) return;
+      const loaded = records
+        .sort((left, right) => left.order - right.order)
+        .map(fromStored);
+      const existing = new Set(docsRef.current.real.map((doc) => doc.id));
+      const restored = loaded.filter((doc) => !existing.has(doc.id));
+      restored.forEach((doc, index) => savedRef.current.set(doc.id, { doc, order: index }));
+      if (restored.length) setDocsFor("real", (previous) => [...restored, ...previous]);
+      setHydrated(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [setDocsFor]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const saved = savedRef.current;
+    const current = docsByMode.real;
+    const put: StoredDocument[] = [];
+    current.forEach((doc, order) => {
+      const previous = saved.get(doc.id);
+      if (previous && previous.doc === doc && previous.order === order) return;
+      if (previous && previous.order === order && doc.ocrState === "识别中") return;
+      put.push(toStored(doc, order));
+      saved.set(doc.id, { doc, order });
+    });
+    const currentIds = new Set(current.map((doc) => doc.id));
+    const remove = Array.from(saved.keys()).filter((id) => !currentIds.has(id));
+    remove.forEach((id) => saved.delete(id));
+    void writeRecords(put, remove);
+  }, [hydrated, docsByMode.real]);
 
   const setDocs = useCallback(
     (update: (previous: LocalDocument[]) => LocalDocument[]) => setDocsFor(mode, update),
@@ -243,7 +303,7 @@ export function DocumentsProvider({ children }: { children: ReactNode }) {
       const files = Array.from(input);
       const rejected: string[] = [];
       const accepted: File[] = [];
-      let room = MAX_BATCH_FILES - docsRef.current[mode].length;
+      let room = MAX_BATCH_FILES;
       files.forEach((file) => {
         const mime = normalizeMime(file);
         if (!acceptedName(file, mime)) {
@@ -255,7 +315,7 @@ export function DocumentsProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (room <= 0) {
-          rejected.push(`${file.name}：本批最多 ${MAX_BATCH_FILES} 份，请先核对已导入的文件。`);
+          rejected.push(`${file.name}：每次最多导入 ${MAX_BATCH_FILES} 份，请分批选取。`);
           return;
         }
         room -= 1;

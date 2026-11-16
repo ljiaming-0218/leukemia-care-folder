@@ -5,6 +5,7 @@ import { useDocuments } from "@/src/features/documents/DocumentsContext";
 import { useLedger } from "@/src/features/ledger/LedgerContext";
 import { usePrepareState } from "@/src/features/prepare/PrepareStateContext";
 import { useWorkspace } from "@/src/features/workspace/WorkspaceContext";
+import { localStoreNote, useLocalStoreStatus } from "@/src/lib/localStore";
 import { usePageTitle } from "@/src/lib/usePageTitle";
 
 const sources = [
@@ -98,6 +99,7 @@ export default function AboutPage() {
   usePageTitle("项目说明");
 
   const { modeLabel, isDemo } = useWorkspace();
+  const storageNote = localStoreNote(useLocalStoreStatus(), false);
   const { reset } = usePrepareState();
   const { clearAll: clearDocuments } = useDocuments();
   const { clearLedger } = useLedger();
@@ -189,13 +191,16 @@ export default function AboutPage() {
         <div className="card">
           <ul className="plain-list">
             <li>票据识别和账本记录都在浏览器内完成，不把家长的票据发送给外部识别服务。</li>
-            <li>首版每批最多 20 个文件、单文件 20 MB。这是网站处理限制，不是官方申报要求。</li>
+            <li>每次最多导入 20 个文件、单文件 20 MB。这是网站处理限制，不是官方申报要求。</li>
             <li>原始文件独立保留，下载内容与导入字节一致；旋转、放大和识别使用副本。</li>
             <li>同路人故事来自公开报道，已对未成年人姓名、具体地点和精确日期做去标识化处理；不展示正脸、证件号、病历号或完整住址。</li>
             <li>
               演示工作区与真实工作区分开保存：首页「用示例体验」载入虚构票据，顶部横幅可返回真实工作区。演示备份只能恢复到演示工作区，真实备份也不能导入演示。
             </li>
-            <li>当前版本没有上传入口；票据、账本和材料关联只在页面会话中保留，刷新或关闭页面后需要重新导入。</li>
+            <li>
+              当前版本没有上传入口。真实工作区的票据原件、账本和材料核对状态保存在这台设备的浏览器存储（IndexedDB）里，刷新或关闭页面后仍在；演示工作区不保存。换设备、清理浏览器数据或使用无痕窗口时不会保留。
+              <span className="field__hint"> {storageNote}</span>
+            </li>
           </ul>
         </div>
       </section>
@@ -208,7 +213,7 @@ export default function AboutPage() {
         </div>
         <div className="card">
           <p className="card__body">
-            只清空当前工作区（{modeLabel}）的票据原件、家庭账目、导出用的会话数据，以及「提交准备」页的材料核对状态和原件关联。{isDemo ? "真实工作区的资料不受影响，可在顶部横幅返回后继续使用。" : "不会改动演示工作区。"} 已导出的 CSV 或账本备份保存在浏览器下载目录中，不会被删除。
+            只清空当前工作区（{modeLabel}）的票据原件、家庭账目，以及「提交准备」页的材料核对状态和原件关联；{isDemo ? "真实工作区的资料不受影响，可在顶部横幅返回后继续使用。" : "保存在本机浏览器里的这些资料会一并删除，不会改动演示工作区。"} 已导出的 CSV 或账本备份保存在浏览器下载目录中，不会被删除。
           </p>
           <div className="btn-row">
             <button

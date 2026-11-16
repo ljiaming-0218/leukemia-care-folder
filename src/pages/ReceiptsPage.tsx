@@ -8,6 +8,7 @@ import { useLedger } from "@/src/features/ledger/LedgerContext";
 import { usePrepareState } from "@/src/features/prepare/PrepareStateContext";
 import { useWorkspace } from "@/src/features/workspace/WorkspaceContext";
 import type { LocalDocument } from "@/src/domain/documents";
+import { localStoreNote, useLocalStoreStatus } from "@/src/lib/localStore";
 import { usePageTitle } from "@/src/lib/usePageTitle";
 
 const waitingStates = ["待识别", "已取消", "识别失败"];
@@ -15,6 +16,7 @@ const waitingStates = ["待识别", "已取消", "识别失败"];
 export default function ReceiptsPage() {
   usePageTitle("票据导入与核对");
   const { isDemo, modeLabel, demoStatus } = useWorkspace();
+  const storageNote = localStoreNote(useLocalStoreStatus(), isDemo);
   const {
     docs,
     flags,
@@ -95,7 +97,7 @@ export default function ReceiptsPage() {
       />
 
       <p className="notice" role="note">
-        当前为{modeLabel}，文件只在本次页面会话中保留。每批最多 20 份，单份 20 MB。
+        当前为{modeLabel}。{storageNote}每次最多导入 20 份，单份 20 MB。
       </p>
       {isDemo && demoStatus === "ready" && (
         <p className="callout" role="note">

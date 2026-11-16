@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAssistant } from "@/src/features/assistant/AssistantContext";
 import { useWorkspace } from "@/src/features/workspace/WorkspaceContext";
+import { localStoreNote, useLocalStoreStatus } from "@/src/lib/localStore";
 import { usePageTitle } from "@/src/lib/usePageTitle";
 import { knowledgeCards } from "@/src/data/knowledge/cards";
 import { glossaryEntries } from "@/src/data/knowledge/glossary";
@@ -44,6 +45,7 @@ export default function HomePage() {
   usePageTitle("首页");
   const { isDemo, demoStatus, enterDemo, reloadDemo, exitDemo } = useWorkspace();
   const { open: openAssistant } = useAssistant();
+  const storageStatus = useLocalStoreStatus();
 
   return (
     <>
@@ -83,14 +85,14 @@ export default function HomePage() {
         <aside className="hero-file hero-file--workspace" aria-label="当前工作区">
           <div className="hero-file__top">
             <span>当前工作区</span>
-            <span className="hero-file__badge">本机会话</span>
+            <span className="hero-file__badge">{isDemo ? "演示不保存" : storageStatus === "ok" ? "已存本机" : "本机会话"}</span>
           </div>
           <div className="hero-file__state">
             <b>{isDemo ? "演示工作区" : "真实工作区"}</b>
             <p>
               {isDemo
                 ? "正在查看景宁家庭的虚构票据与账目，修改不会影响真实资料。"
-                : "票据、账目和材料只保存在当前浏览器会话；离开前可导出 CSV 或账本备份。"}
+                : `票据、账目和材料只在这台设备上。${localStoreNote(storageStatus, false)}`}
             </p>
           </div>
           <div className="hero-file__actions">

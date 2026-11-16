@@ -301,7 +301,7 @@ export default function PreparePage() {
       })}
 
       <p className="notice">
-        本页状态只在当前页面会话中保留。是否已提交由你在支付宝页面确认后自行设置。
+        核对状态和原件关联随工作区保存在本机。是否已提交由你在官方入口确认后自行设置。
       </p>
 
       <div className="btn-row">

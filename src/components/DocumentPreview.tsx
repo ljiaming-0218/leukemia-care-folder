@@ -185,7 +185,7 @@ export function DocumentPreview({ doc, index, initialPage, onClose }: DocumentPr
         </div>
 
         <p className="preview-foot">
-          原件按原始字节保存，旋转、放大只影响这里的显示。页面关闭后本批文件仍保留在当前浏览器会话中。
+          原件按原始字节保存，旋转、放大只影响这里的显示。
         </p>
       </div>
     </dialog>

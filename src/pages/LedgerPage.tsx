@@ -32,6 +32,7 @@ import { useDocuments } from "@/src/features/documents/DocumentsContext";
 import { downloadStamp, localToday, useLedger } from "@/src/features/ledger/LedgerContext";
 import { useWorkspace, type WorkspaceMode } from "@/src/features/workspace/WorkspaceContext";
 import { downloadOriginal, downloadText } from "@/src/lib/download";
+import { localStoreNote, useLocalStoreStatus } from "@/src/lib/localStore";
 import { usePageTitle } from "@/src/lib/usePageTitle";
 
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024;
@@ -76,6 +77,7 @@ function AmountCell({ amount }: { amount: AmountSummary }) {
 export default function LedgerPage() {
   usePageTitle("家庭费用");
   const { mode, isDemo, modeLabel } = useWorkspace();
+  const storageNote = localStoreNote(useLocalStoreStatus(), isDemo);
   const { docs } = useDocuments();
   const {
     entries,
@@ -309,7 +311,7 @@ export default function LedgerPage() {
       />
 
       <p className="notice" role="note">
-        当前为{modeLabel}，账本只在当前页面会话中保留。离开前可导出 CSV 或账本备份。
+        当前为{modeLabel}。{storageNote}换设备前可导出 CSV 或账本备份。
       </p>
 
       <div className="status-strip" role="status">
@@ -733,7 +735,7 @@ export default function LedgerPage() {
                     setEditingId(null);
                     setCreating(false);
                     setSelectedIds([]);
-                    setFeedback({ tone: "ok", text: "账本已清空；票据原件仍保留在本次会话中。" });
+                    setFeedback({ tone: "ok", text: "账本已清空；票据原件仍保留在票据页。" });
                   }}
                 >
                   确认清空

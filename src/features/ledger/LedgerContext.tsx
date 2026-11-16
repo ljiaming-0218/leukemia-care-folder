@@ -2,12 +2,21 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 import type { ExpenseEntry } from "@/src/domain/ledger";
 import { useWorkspace, type WorkspaceMode } from "@/src/features/workspace/WorkspaceContext";
+import { loadValue, saveValue } from "@/src/lib/localStore";
+
+const LEDGER_KEY = "real:ledger";
+
+type StoredLedger = {
+  entries: ExpenseEntry[];
+  lastImport: ImportMeta | null;
+};
 
 type AddResult = { ok: true } | { ok: false; error: string };
 
@@ -68,8 +77,39 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
   const [lastImportByMode, setLastImportByMode] = useState<
     Record<WorkspaceMode, ImportMeta | null>
   >({ real: null, demo: null });
+  const [hydrated, setHydrated] = useState(false);
   const entries = entriesByMode[mode];
   const lastImport = lastImportByMode[mode];
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadValue<StoredLedger>(LEDGER_KEY).then((stored) => {
+      if (cancelled) return;
+      if (stored && Array.isArray(stored.entries)) {
+        setEntriesByMode((previous) => ({
+          ...previous,
+          real: [...stored.entries, ...previous.real],
+        }));
+        setLastImportByMode((previous) => ({
+          ...previous,
+          real: previous.real ?? stored.lastImport ?? null,
+        }));
+      }
+      setHydrated(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const stored: StoredLedger = {
+      entries: entriesByMode.real,
+      lastImport: lastImportByMode.real,
+    };
+    void saveValue(LEDGER_KEY, stored);
+  }, [hydrated, entriesByMode.real, lastImportByMode.real]);
 
   const setEntriesFor = useCallback(
     (target: WorkspaceMode, update: (previous: ExpenseEntry[]) => ExpenseEntry[]) => {

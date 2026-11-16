@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -8,9 +9,14 @@ import {
 import { xiaoludengRule } from "@/src/data/policies/xiaoludeng";
 import type { MaterialState } from "@/src/domain/schemas";
 import { useWorkspace, type WorkspaceMode } from "@/src/features/workspace/WorkspaceContext";
+import { loadValue, saveValue } from "@/src/lib/localStore";
 
 type PrepareStateMap = Record<string, MaterialState>;
 type LinkedDocumentsMap = Record<string, string[]>;
+
+const PREPARE_KEY = "real:prepare";
+
+type StoredPrepare = { states: PrepareStateMap; links: LinkedDocumentsMap };
 
 type PrepareStateValue = {
   states: PrepareStateMap;
@@ -39,6 +45,34 @@ export function PrepareStateProvider({ children }: { children: ReactNode }) {
   });
   const states = statesByMode[mode];
   const linkedDocuments = linksByMode[mode];
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadValue<StoredPrepare>(PREPARE_KEY).then((stored) => {
+      if (cancelled) return;
+      if (stored) {
+        setStatesByMode((previous) => ({
+          ...previous,
+          real: { ...stored.states, ...previous.real },
+        }));
+        setLinksByMode((previous) => ({
+          ...previous,
+          real: { ...stored.links, ...previous.real },
+        }));
+      }
+      setHydrated(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const stored: StoredPrepare = { states: statesByMode.real, links: linksByMode.real };
+    void saveValue(PREPARE_KEY, stored);
+  }, [hydrated, statesByMode.real, linksByMode.real]);
 
   const value = useMemo<PrepareStateValue>(() => {
     const items = xiaoludengRule.materialItems;
