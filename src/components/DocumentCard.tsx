@@ -15,7 +15,8 @@ import {
   type DocFlag,
   type LocalDocument,
 } from "../domain/documents";
-import { xiaoludengRule } from "../data/policies/xiaoludeng";
+import { useAidRule } from "../features/prepare/AidRuleContext";
+import { docInRule } from "../domain/aidWindow";
 
 type DocumentCardProps = {
   doc: LocalDocument;
@@ -47,18 +48,16 @@ export function DocumentCard({ doc, index, flags, onPreview }: DocumentCardProps
   const { updateArchiveType, updateField, setConfirmed, dismissFlag, removeDoc, startRecognition, isRunning } =
     useDocuments();
   const { usedDocumentIds } = useLedger();
-  const { linkedDocuments } = usePrepareState();
+  const { linkedMaterialLabels: labelsFor } = usePrepareState();
+  const { rule } = useAidRule();
   const [amountText, setAmountText] = useState(() => fenToYuanInput(doc.fields.amountFen.value));
   const [amountError, setAmountError] = useState("");
   const [confirmRemove, setConfirmRemove] = useState(false);
   const status = stateTag(doc);
-  const window = windowStatus(doc, xiaoludengRule.expenseFrom, xiaoludengRule.expenseTo);
+  const window = docInRule(doc, rule) ? windowStatus(doc, rule) : null;
   const canRerun = doc.ocrState !== "不支持";
   const usedInLedger = usedDocumentIds.has(doc.id);
-  const linkedMaterialLabels = Object.entries(linkedDocuments)
-    .filter(([, ids]) => ids.includes(doc.id))
-    .map(([itemId]) => xiaoludengRule.materialItems.find((item) => item.id === itemId)?.label)
-    .filter((label): label is string => Boolean(label));
+  const linkedMaterialLabels = labelsFor(doc.id);
   const removalBlocked = usedInLedger || linkedMaterialLabels.length > 0;
 
   useEffect(() => {
@@ -112,7 +111,7 @@ export function DocumentCard({ doc, index, flags, onPreview }: DocumentCardProps
           </p>
           <div className="tag-row">
             <span className={`tag tag--${status.tone}`}>{status.label}</span>
-            <span className={`tag tag--${window.tone}`}>{window.label}</span>
+            {window && <span className={`tag tag--${window.tone}`}>{window.label}</span>}
             {doc.confirmed && <span className="tag tag--ok">家长已核对</span>}
           </div>
         </div>

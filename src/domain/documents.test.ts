@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { defaultAidRule } from "@/src/data/policies/aidRules";
+import { docInRule } from "./aidWindow";
 import {
   computeFlags,
   createEmptyFields,
@@ -26,7 +28,7 @@ function makeDoc(id: string, overrides: Partial<LocalDocument> = {}): LocalDocum
   };
 }
 
-const window = { from: "2026-04-01", to: "2026-12-31" };
+const window = { from: "2026-04-01", to: "2026-12-31", name: "小鹿灯第五期", applies: () => true };
 
 describe("yuanInputToFen", () => {
   it("accepts yuan values with up to two decimals", () => {
@@ -92,5 +94,24 @@ describe("computeFlags", () => {
     const flags = computeFlags(docs, window);
     expect(flags.missing.map((flag) => flag.key)).toContain("expense-missing");
     expect(flags.outside.map((flag) => flag.key)).toContain("window-out");
+  });
+});
+
+describe("computeFlags with an aid rule", () => {
+  it("only flags out-of-window dates for document types the rule covers", () => {
+    const outside = {
+      confirmed: true,
+      fields: { ...createEmptyFields(), expenseDate: { value: "2026-01-01", origin: "家长填写" as const } },
+    };
+    const docs = [
+      makeDoc("hospital", { ...outside, archiveType: "住院发票" }),
+      makeDoc("drug", { ...outside, archiveType: "外购药票据" }),
+    ];
+    const flags = computeFlags(docs, {
+      ...window,
+      applies: (doc) => docInRule(doc, defaultAidRule),
+    });
+    expect(flags.hospital).toBeUndefined();
+    expect(flags.drug.map((flag) => flag.key)).toEqual(["window-out"]);
   });
 });

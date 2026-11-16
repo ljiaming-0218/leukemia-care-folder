@@ -1,22 +1,35 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
-import { xiaoludengRule } from "@/src/data/policies/xiaoludeng";
+import { aidRules, defaultAidRule } from "@/src/data/policies/aidRules";
 import type { MaterialState } from "@/src/domain/schemas";
+import { useAidRule } from "@/src/features/prepare/AidRuleContext";
 import { useWorkspace, type WorkspaceMode } from "@/src/features/workspace/WorkspaceContext";
 import { loadValue, saveValue } from "@/src/lib/localStore";
 
 type PrepareStateMap = Record<string, MaterialState>;
 type LinkedDocumentsMap = Record<string, string[]>;
+type RulePrepare = { states: PrepareStateMap; links: LinkedDocumentsMap };
+type PrepareByRule = Record<string, RulePrepare>;
 
 const PREPARE_KEY = "real:prepare";
 
-type StoredPrepare = { states: PrepareStateMap; links: LinkedDocumentsMap };
+type StoredPrepare = { version: 2; byRule: PrepareByRule };
+type LegacyStoredPrepare = { states: PrepareStateMap; links: LinkedDocumentsMap };
+
+const emptyRule: RulePrepare = { states: {}, links: {} };
+
+function readStored(stored: StoredPrepare | LegacyStoredPrepare | null | undefined): PrepareByRule {
+  if (!stored) return {};
+  if ("byRule" in stored) return stored.byRule;
+  return { [defaultAidRule.id]: { states: stored.states ?? {}, links: stored.links ?? {} } };
+}
 
 type PrepareStateValue = {
   states: PrepareStateMap;
@@ -25,9 +38,12 @@ type PrepareStateValue = {
   linkDocument: (itemId: string, documentId: string) => void;
   unlinkDocument: (itemId: string, documentId: string) => void;
   reset: () => void;
+  resetAll: () => void;
   checkedCount: number;
   pendingCount: number;
   total: number;
+  linkedDocumentIds: Set<string>;
+  linkedMaterialLabels: (documentId: string) => string[];
   loadDemoPrepare: (states: PrepareStateMap, links: LinkedDocumentsMap) => void;
 };
 
@@ -35,32 +51,29 @@ const PrepareStateContext = createContext<PrepareStateValue | null>(null);
 
 export function PrepareStateProvider({ children }: { children: ReactNode }) {
   const { mode } = useWorkspace();
-  const [statesByMode, setStatesByMode] = useState<Record<WorkspaceMode, PrepareStateMap>>({
+  const { rule } = useAidRule();
+  const [byMode, setByMode] = useState<Record<WorkspaceMode, PrepareByRule>>({
     real: {},
     demo: {},
   });
-  const [linksByMode, setLinksByMode] = useState<Record<WorkspaceMode, LinkedDocumentsMap>>({
-    real: {},
-    demo: {},
-  });
-  const states = statesByMode[mode];
-  const linkedDocuments = linksByMode[mode];
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    void loadValue<StoredPrepare>(PREPARE_KEY).then((stored) => {
+    void loadValue<StoredPrepare | LegacyStoredPrepare>(PREPARE_KEY).then((stored) => {
       if (cancelled) return;
-      if (stored) {
-        setStatesByMode((previous) => ({
-          ...previous,
-          real: { ...stored.states, ...previous.real },
-        }));
-        setLinksByMode((previous) => ({
-          ...previous,
-          real: { ...stored.links, ...previous.real },
-        }));
-      }
+      const restored = readStored(stored);
+      setByMode((previous) => {
+        const real: PrepareByRule = { ...restored };
+        Object.entries(previous.real).forEach(([ruleId, current]) => {
+          const saved = restored[ruleId] ?? emptyRule;
+          real[ruleId] = {
+            states: { ...saved.states, ...current.states },
+            links: { ...saved.links, ...current.links },
+          };
+        });
+        return { ...previous, real };
+      });
       setHydrated(true);
     });
     return () => {
@@ -70,59 +83,75 @@ export function PrepareStateProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    const stored: StoredPrepare = { states: statesByMode.real, links: linksByMode.real };
+    const stored: StoredPrepare = { version: 2, byRule: byMode.real };
     void saveValue(PREPARE_KEY, stored);
-  }, [hydrated, statesByMode.real, linksByMode.real]);
+  }, [hydrated, byMode.real]);
+
+  const updateRule = useCallback(
+    (update: (current: RulePrepare) => RulePrepare) =>
+      setByMode((previous) => ({
+        ...previous,
+        [mode]: {
+          ...previous[mode],
+          [rule.id]: update(previous[mode][rule.id] ?? emptyRule),
+        },
+      })),
+    [mode, rule.id],
+  );
 
   const value = useMemo<PrepareStateValue>(() => {
-    const items = xiaoludengRule.materialItems;
+    const current = byMode[mode][rule.id] ?? emptyRule;
+    const { states, links } = current;
+    const items = rule.materialItems;
     const checked = items.filter(
       (item) =>
         states[item.id] === "已准备" || states[item.id] === "已向项目方确认无需提供",
     ).length;
     const pending = items.filter((item) => states[item.id] === "待确认").length;
+    const modeRules = byMode[mode];
+    const linkedDocumentIds = new Set(
+      Object.values(modeRules).flatMap((entry) => Object.values(entry.links).flat()),
+    );
 
     return {
       states,
       setState: (id, state) =>
-        setStatesByMode((previous) => ({
-          ...previous,
-          [mode]: { ...previous[mode], [id]: state },
-        })),
-      linkedDocuments,
+        updateRule((previous) => ({ ...previous, states: { ...previous.states, [id]: state } })),
+      linkedDocuments: links,
       linkDocument: (itemId, documentId) =>
-        setLinksByMode((previous) => {
-          const current = previous[mode][itemId] ?? [];
-          if (current.includes(documentId)) return previous;
-          return {
-            ...previous,
-            [mode]: { ...previous[mode], [itemId]: [...current, documentId] },
-          };
+        updateRule((previous) => {
+          const list = previous.links[itemId] ?? [];
+          if (list.includes(documentId)) return previous;
+          return { ...previous, links: { ...previous.links, [itemId]: [...list, documentId] } };
         }),
       unlinkDocument: (itemId, documentId) =>
-        setLinksByMode((previous) => {
-          const next = (previous[mode][itemId] ?? []).filter((id) => id !== documentId);
-          const modeLinks = { ...previous[mode] };
-          if (!next.length) {
-            delete modeLinks[itemId];
-          } else {
-            modeLinks[itemId] = next;
-          }
-          return { ...previous, [mode]: modeLinks };
+        updateRule((previous) => {
+          const next = (previous.links[itemId] ?? []).filter((id) => id !== documentId);
+          const nextLinks = { ...previous.links };
+          if (next.length) nextLinks[itemId] = next;
+          else delete nextLinks[itemId];
+          return { ...previous, links: nextLinks };
         }),
-      reset: () => {
-        setStatesByMode((previous) => ({ ...previous, [mode]: {} }));
-        setLinksByMode((previous) => ({ ...previous, [mode]: {} }));
-      },
+      reset: () => updateRule(() => emptyRule),
+      resetAll: () => setByMode((previous) => ({ ...previous, [mode]: {} })),
       checkedCount: checked,
       pendingCount: pending,
       total: items.length,
-      loadDemoPrepare: (nextStates, nextLinks) => {
-        setStatesByMode((previous) => ({ ...previous, demo: nextStates }));
-        setLinksByMode((previous) => ({ ...previous, demo: nextLinks }));
-      },
+      linkedDocumentIds,
+      linkedMaterialLabels: (documentId) =>
+        aidRules.flatMap((aidRule) => {
+          const ruleLinks = modeRules[aidRule.id]?.links ?? {};
+          return aidRule.materialItems
+            .filter((item) => ruleLinks[item.id]?.includes(documentId))
+            .map((item) => `${aidRule.shortName} · ${item.label}`);
+        }),
+      loadDemoPrepare: (nextStates, nextLinks) =>
+        setByMode((previous) => ({
+          ...previous,
+          demo: { [defaultAidRule.id]: { states: nextStates, links: nextLinks } },
+        })),
     };
-  }, [states, linkedDocuments, mode]);
+  }, [byMode, mode, rule, updateRule]);
 
   return <PrepareStateContext.Provider value={value}>{children}</PrepareStateContext.Provider>;
 }

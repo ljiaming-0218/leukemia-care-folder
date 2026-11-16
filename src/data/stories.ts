@@ -152,7 +152,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     supports: ["「福州小家」提供免费住宿和生活物资", "志愿者担任临时监护人，陪同化疗与走疗"],
     tools: [
       { label: "查医疗救助", to: "/resources?region=全国&category=医疗救助" },
-      { label: "小鹿灯材料准备", to: "/prepare" },
+      { label: "小鹿灯材料准备", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
       { label: "整理票据", to: "/receipts" },
     ],
     accent: "gold",
@@ -214,7 +214,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     tools: [
       { label: "查公益救助入口", to: "/resources?region=全国&category=公益项目" },
       { label: "记一笔救助到账", to: "/ledger" },
-      { label: "小鹿灯材料准备", to: "/prepare" },
+      { label: "小鹿灯材料准备", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
     ],
     accent: "rose",
     source: {
@@ -331,7 +331,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     tools: [
       { label: "查公益救助入口", to: "/resources?region=全国&category=公益项目" },
       { label: "整理票据", to: "/receipts" },
-      { label: "小鹿灯材料准备", to: "/prepare" },
+      { label: "小鹿灯材料准备", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
     ],
     accent: "teal",
     source: {
@@ -391,7 +391,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     supports: ["医院青少年血液病救助基金 3 万至 5 万元", "母亲作为供者的单倍体移植"],
     tools: [
       { label: "查医疗救助", to: "/resources?region=全国&category=医疗救助" },
-      { label: "小鹿灯材料准备", to: "/prepare" },
+      { label: "小鹿灯材料准备", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
       { label: "整理票据", to: "/receipts" },
     ],
     accent: "gold",

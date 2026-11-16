@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { xiaoludengRule } from "@/src/data/policies/xiaoludeng";
+import { aidRules } from "@/src/data/policies/aidRules";
 import { PageHeader } from "@/src/components/PageHeader";
 import { useDocuments } from "@/src/features/documents/DocumentsContext";
 import { useLedger } from "@/src/features/ledger/LedgerContext";
@@ -101,7 +101,7 @@ export default function AboutPage() {
 
   const { modeLabel, isDemo } = useWorkspace();
   const storageNote = localStoreNote(useLocalStoreStatus(), false);
-  const { reset } = usePrepareState();
+  const { resetAll } = usePrepareState();
   const { clearAll: clearDocuments } = useDocuments();
   const { clearLedger } = useLedger();
   const [cleared, setCleared] = useState(false);
@@ -117,30 +117,35 @@ export default function AboutPage() {
       <section className="section" aria-labelledby="rule-title">
         <div className="section__head">
           <h2 className="section__title" id="rule-title">
-            当前规则版本
+            已结构化的救助规则
           </h2>
         </div>
-        <div className="card">
-          <dl className="kv">
-            <dt>规则 ID</dt>
-            <dd>{xiaoludengRule.id}</dd>
-            <dt>版本</dt>
-            <dd>{xiaoludengRule.version}</dd>
-            <dt>公告发布</dt>
-            <dd>{xiaoludengRule.publishedAt}</dd>
-            <dt>本站核对</dt>
-            <dd>{xiaoludengRule.verifiedAt}</dd>
-            <dt>费用发生时间</dt>
-            <dd>
-              {xiaoludengRule.expenseFrom} 至 {xiaoludengRule.expenseTo}
-            </dd>
-            <dt>申报时间</dt>
-            <dd>{xiaoludengRule.deadlineText}</dd>
-          </dl>
-          <p className="meta-line" style={{ marginTop: 10 }}>
-            已发布的规则内容、来源日期和核对日期随版本保留。正式文件更新后，通过发布新的规则版本修订。
-          </p>
-        </div>
+        {aidRules.map((rule) => (
+          <div className="card" key={rule.id}>
+            <h3 className="card__title">{rule.title}</h3>
+            <dl className="kv" style={{ marginTop: 10 }}>
+              <dt>规则 ID</dt>
+              <dd>{rule.id}</dd>
+              <dt>版本</dt>
+              <dd>{rule.version}</dd>
+              <dt>适用地区</dt>
+              <dd>{rule.region}</dd>
+              <dt>公告发布</dt>
+              <dd>{rule.publishedAt}</dd>
+              <dt>本站核对</dt>
+              <dd>{rule.verifiedAt}</dd>
+              <dt>费用发生时间</dt>
+              <dd>
+                {rule.expenseFrom} 至 {rule.expenseTo}
+              </dd>
+              <dt>申报时间</dt>
+              <dd>{rule.deadlineText}</dd>
+            </dl>
+          </div>
+        ))}
+        <p className="meta-line" style={{ marginTop: 10 }}>
+          目前只有上面这些规则做成了可对照的结构化清单，其他救助项目在「医保和救助」页展示原文和官方入口。已发布的规则内容、来源日期和核对日期随版本保留；正式文件更新后，通过发布新的规则版本修订。
+        </p>
       </section>
 
       <section className="section" aria-labelledby="sources-title">
@@ -223,7 +228,7 @@ export default function AboutPage() {
               onClick={() => {
                 clearDocuments();
                 clearLedger();
-                reset();
+                resetAll();
                 if (!isDemo) void saveValue(routeStoreKey, null);
                 setCleared(true);
               }}

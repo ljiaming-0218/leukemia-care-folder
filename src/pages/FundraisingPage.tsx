@@ -205,7 +205,7 @@ export default function FundraisingPage() {
               ：查看公告明示的费用范围和申报时间。
             </li>
             <li>
-              <Link to="/prepare">小鹿灯提交准备</Link>
+              <Link to="/prepare?rule=jingning-xiaoludeng-phase5-2026">小鹿灯提交准备</Link>
               ：按“公告写明”和“请确认”两类整理材料。
             </li>
           </ul>

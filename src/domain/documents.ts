@@ -159,19 +159,20 @@ export function formatBytes(bytes: number): string {
 
 export function windowStatus(
   doc: LocalDocument,
-  from: string,
-  to: string,
+  rule: { expenseFrom: string; expenseTo: string; shortName: string },
 ): { label: string; tone: "ok" | "warn" | "muted" } {
   if (!doc.confirmed) return { label: "费用时间待核对", tone: "muted" };
   const date = doc.fields.expenseDate.value;
   if (!isValidIsoDate(date)) return { label: "费用发生时间待核对", tone: "warn" };
-  if (!isWithinWindow(date, from, to)) return { label: "超出公告时间段", tone: "warn" };
-  return { label: "在公告时间段内", tone: "ok" };
+  if (!isWithinWindow(date, rule.expenseFrom, rule.expenseTo)) {
+    return { label: `${rule.shortName}：窗口外`, tone: "warn" };
+  }
+  return { label: `${rule.shortName}：窗口内`, tone: "ok" };
 }
 
 export function computeFlags(
   docs: LocalDocument[],
-  window: { from: string; to: string },
+  window: { from: string; to: string; name: string; applies: (doc: LocalDocument) => boolean },
 ): Record<string, DocFlag[]> {
   const result: Record<string, DocFlag[]> = {};
   const push = (id: string, flag: DocFlag) => {
@@ -246,16 +247,16 @@ export function computeFlags(
       push(doc.id, {
         key: "expense-missing",
         label: "费用发生时间待核对",
-        detail: "这张票没有确认的费用发生日期，暂不能判断是否在公告时间段内。",
+        detail: "这张票没有确认的费用发生日期，暂不能对照救助项目的费用时间段。",
         dismissible: false,
       });
       return;
     }
-    if (!isWithinWindow(date, window.from, window.to)) {
+    if (window.applies(doc) && !isWithinWindow(date, window.from, window.to)) {
       push(doc.id, {
         key: "window-out",
-        label: "超出公告时间段",
-        detail: `费用发生日期 ${date} 不在 ${window.from} 至 ${window.to} 内。原件仍会保留。`,
+        label: `超出「${window.name}」费用时间段`,
+        detail: `费用发生日期 ${date} 不在 ${window.from} 至 ${window.to} 内。原件仍会保留，也可用于医保报销或其他救助。`,
         dismissible: false,
       });
     }

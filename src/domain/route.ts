@@ -127,7 +127,7 @@ export function buildRoute(place: InsuredPlace, treated: TreatedPlace): RouteSte
           },
       materials: ["诊断证明", "项目要求的费用票据和明细", "家庭情况说明"],
       receiptTypes: ["外购药票据", "基因检测票据", "费用清单"],
-      links: isJingning ? [{ label: "小鹿灯材料逐项核对", to: "/prepare" }] : [],
+      links: isJingning ? [{ label: "小鹿灯材料逐项核对", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" }] : [],
     },
     {
       id: "fundraising",

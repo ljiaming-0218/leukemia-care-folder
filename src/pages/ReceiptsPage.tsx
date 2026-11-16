@@ -28,11 +28,7 @@ export default function ReceiptsPage() {
     cancelRecognition,
   } = useDocuments();
   const { usedDocumentIds } = useLedger();
-  const { linkedDocuments } = usePrepareState();
-  const linkedDocumentIds = useMemo(
-    () => new Set(Object.values(linkedDocuments).flat()),
-    [linkedDocuments],
-  );
+  const { linkedDocumentIds } = usePrepareState();
   const protectedDocs = useMemo(
     () =>
       docs.filter(

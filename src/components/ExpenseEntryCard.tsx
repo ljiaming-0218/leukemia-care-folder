@@ -10,7 +10,11 @@ import {
   type ExpenseEntry,
 } from "@/src/domain/ledger";
 import { formatFen, safeDownloadName, type LocalDocument } from "@/src/domain/documents";
+import { entryWindowTag, isRuleCategory, type WindowTag } from "@/src/domain/aidWindow";
+import { useAidRule } from "@/src/features/prepare/AidRuleContext";
 import { downloadOriginal } from "@/src/lib/download";
+
+const windowTone: Record<WindowTag, string> = { 窗口内: "ok", 窗口外: "warn", 日期待核对: "warn" };
 
 type ExpenseEntryCardProps = {
   entry: ExpenseEntry;
@@ -37,6 +41,7 @@ export function ExpenseEntryCard({
   onRemove,
   onToggleConfirmed,
 }: ExpenseEntryCardProps) {
+  const { rule } = useAidRule();
   const [confirmRemove, setConfirmRemove] = useState(false);
   const linked = entry.documentIds
     .map((id) => {
@@ -67,6 +72,11 @@ export function ExpenseEntryCard({
                   ? `原件缺失 ${missingCount} 份`
                   : "原件未关联"}
             </span>
+            {isRuleCategory(entry, rule) && (
+              <span className={`tag tag--${windowTone[entryWindowTag(entry, rule)]}`}>
+                {rule.shortName}：{entryWindowTag(entry, rule)}
+              </span>
+            )}
           </div>
         </div>
       </header>

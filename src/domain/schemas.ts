@@ -131,10 +131,14 @@ export type MaterialState = z.infer<typeof materialStateSchema>;
 export const materialStateValues = materialStateSchema.options;
 
 export const aidRuleSchema = z.object({
-  id: z.literal("jingning-xiaoludeng-phase5-2026"),
+  id: z.string().regex(/^[a-z0-9-]+$/),
   version: z.string().min(1),
   title: z.string().min(1),
-  region: z.literal("景宁"),
+  shortName: z.string().min(1),
+  region: z.string().min(1),
+  scopeText: z.string().min(1),
+  resourceId: z.string().min(1),
+  eligibleCategories: z.array(z.enum(["住院", "门诊", "外购药", "基因检测"])).min(1),
   expenseFrom: isoDateSchema,
   expenseTo: isoDateSchema,
   deadlineText: z.string().min(1),
@@ -142,7 +146,8 @@ export const aidRuleSchema = z.object({
   publishedAt: isoDateSchema,
   verifiedAt: isoDateSchema,
   officialEntryText: z.string().min(1),
-  hotline: z.string().min(1),
+  hotline: z.string().min(1).optional(),
+  hotlineNote: z.string().min(1).optional(),
   materialItems: z
     .array(
       z.object({

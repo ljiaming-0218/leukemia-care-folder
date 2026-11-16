@@ -8,7 +8,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { xiaoludengRule } from "../../data/policies/xiaoludeng";
+import { useAidRule } from "../prepare/AidRuleContext";
+import { docInRule } from "../../domain/aidWindow";
 import {
   archiveTypes,
   computeFlags,
@@ -98,6 +99,7 @@ function fromStored(stored: StoredDocument): LocalDocument {
 
 export function DocumentsProvider({ children }: { children: ReactNode }) {
   const { mode } = useWorkspace();
+  const { rule } = useAidRule();
   const [docsByMode, setDocsByMode] = useState<Record<WorkspaceMode, LocalDocument[]>>({
     real: [],
     demo: [],
@@ -449,10 +451,12 @@ export function DocumentsProvider({ children }: { children: ReactNode }) {
   const flags = useMemo(
     () =>
       computeFlags(docs, {
-        from: xiaoludengRule.expenseFrom,
-        to: xiaoludengRule.expenseTo,
+        from: rule.expenseFrom,
+        to: rule.expenseTo,
+        name: rule.shortName,
+        applies: (doc) => docInRule(doc, rule),
       }),
-    [docs],
+    [docs, rule],
   );
 
   const visibleFlags = useMemo(() => {

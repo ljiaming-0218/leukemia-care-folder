@@ -6,6 +6,7 @@ import { AssistantLauncher, AssistantPanel } from "@/src/components/AssistantPan
 import { AssistantProvider } from "@/src/features/assistant/AssistantContext";
 import { DocumentsProvider } from "@/src/features/documents/DocumentsContext";
 import { LedgerProvider } from "@/src/features/ledger/LedgerContext";
+import { AidRuleProvider } from "@/src/features/prepare/AidRuleContext";
 import { PrepareStateProvider } from "@/src/features/prepare/PrepareStateContext";
 import { DemoWorkspaceLoader } from "@/src/features/workspace/DemoWorkspaceLoader";
 import { useWorkspace, WorkspaceProvider } from "@/src/features/workspace/WorkspaceContext";
@@ -86,6 +87,7 @@ export default function App() {
   return (
     <AssistantProvider>
       <WorkspaceProvider>
+        <AidRuleProvider>
         <DocumentsProvider>
           <LedgerProvider>
             <PrepareStateProvider>
@@ -120,6 +122,7 @@ export default function App() {
           </PrepareStateProvider>
         </LedgerProvider>
       </DocumentsProvider>
+        </AidRuleProvider>
     </WorkspaceProvider>
   </AssistantProvider>
   );

@@ -7,7 +7,7 @@ import { DocumentPreview } from "@/src/components/DocumentPreview";
 import { ExpenseEntryCard } from "@/src/components/ExpenseEntryCard";
 import { ExpenseEntryForm } from "@/src/components/ExpenseEntryForm";
 import { PageHeader } from "@/src/components/PageHeader";
-import { xiaoludengRule } from "@/src/data/policies/xiaoludeng";
+import { useAidRule } from "@/src/features/prepare/AidRuleContext";
 import {
   amountLabels,
   backupToEntries,
@@ -82,6 +82,7 @@ export default function LedgerPage() {
   const { mode, isDemo, modeLabel } = useWorkspace();
   const storageNote = localStoreNote(useLocalStoreStatus(), isDemo);
   const { docs } = useDocuments();
+  const { rule } = useAidRule();
   const {
     entries,
     usedDocumentIds,
@@ -180,7 +181,7 @@ export default function LedgerPage() {
   const exportBackup = () => {
     const backup = createBackup(entries, {
       exportedAt: new Date().toISOString(),
-      ruleId: xiaoludengRule.id,
+      ruleId: rule.id,
       mode,
       sourceIndexes: (entry) => currentIndexes(entry, docs),
     });
