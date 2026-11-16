@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Link } from "react-router-dom";
 import { CopyButton } from "@/src/components/CopyButton";
+import { CostStatementCard } from "@/src/components/CostStatementCard";
 import { DocumentPreview } from "@/src/components/DocumentPreview";
 import { ExpenseEntryCard } from "@/src/components/ExpenseEntryCard";
 import { ExpenseEntryForm } from "@/src/components/ExpenseEntryForm";
@@ -34,6 +36,7 @@ import { useWorkspace, type WorkspaceMode } from "@/src/features/workspace/Works
 import { downloadOriginal, downloadText } from "@/src/lib/download";
 import { localStoreNote, useLocalStoreStatus } from "@/src/lib/localStore";
 import { usePageTitle } from "@/src/lib/usePageTitle";
+import { scrollToElement } from "@/src/lib/scrollToElement";
 
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024;
 
@@ -367,6 +370,23 @@ export default function LedgerPage() {
             「个人自付」「个人自费」「其他支付」按票面原标签各自展示，不与统筹支付相加。
           </p>
         </section>
+      )}
+
+      {countedEntries.length > 0 && (
+        <CostStatementCard
+          entries={entries}
+          docs={docs}
+          sourceLabel={(entry) => sourceLabelFor(entry, docs)}
+          onPreview={setPreview}
+          onJump={(entryId) => {
+            flushSync(() => {
+              setFilterCategory("全部");
+              setFilterMonth("全部");
+            });
+            const target = document.getElementById(`entry-${entryId}`);
+            if (target) scrollToElement(target);
+          }}
+        />
       )}
 
       {docs.length === 0 && entries.length === 0 && (

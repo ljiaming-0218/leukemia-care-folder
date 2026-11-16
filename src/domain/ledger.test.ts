@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   backupToEntries,
+  buildCostStatement,
+  costStatementText,
   createBackup,
   createEmptyAid,
   createEmptyAmounts,
@@ -135,5 +137,48 @@ describe("ledger summaries and backup", () => {
     expect(restored[0].sourceIndexes).toEqual([2]);
     expect(restored[0].amounts.totalFen).toEqual({ value: "12300", status: "原件明确" });
     expect(restored[0].amounts.cashFen).toEqual({ value: "300", status: "家长核对" });
+  });
+});
+
+describe("buildCostStatement", () => {
+  const withAmounts = (values: Partial<Record<"totalFen" | "poolingFen" | "cashFen", string>>) => {
+    const amounts = createEmptyAmounts();
+    Object.entries(values).forEach(([key, value]) => {
+      amounts[key as "totalFen"] = { value: value as string, status: "原件明确" };
+    });
+    return amounts;
+  };
+
+  const entries = [
+    makeEntry({ id: "a", title: "住院", amounts: withAmounts({ totalFen: "10000", poolingFen: "6000" }) }),
+    makeEntry({
+      id: "b",
+      title: "外购药",
+      category: "外购药",
+      amounts: withAmounts({ totalFen: "2500", cashFen: "2500" }),
+      aid: { value: "1000", status: "已到账", note: "" },
+    }),
+    makeEntry({ id: "c", title: "未确认", amounts: withAmounts({ totalFen: "99999" }), confirmed: false }),
+  ];
+  const statement = buildCostStatement(entries, (entry) => (entry.id === "a" ? "1、2" : ""));
+  const row = (key: string) => statement.rows.find((item) => item.key === key)!;
+
+  it("sums only confirmed entries that recorded the amount", () => {
+    expect(statement.entryCount).toBe(2);
+    expect(row("totalFen").fen).toBe(12500);
+    expect(row("totalFen").lines.map((line) => line.entryNumber)).toEqual([1, 2]);
+    expect(row("poolingFen").lines).toHaveLength(1);
+    expect(row("cashFen").lines.map((line) => line.entryId)).toEqual(["b"]);
+    expect(row("aid").fen).toBe(1000);
+  });
+
+  it("leaves unrecorded rows empty instead of zero-filling", () => {
+    expect(row("criticalIllnessFen").lines).toHaveLength(0);
+    const text = costStatementText(statement);
+    expect(text).toContain("大病保险支付：未记录");
+    expect(text).toContain("费用总额：¥125.00（覆盖 2 笔）");
+    expect(text).toContain("原件：1、2");
+    expect(text).toContain("原件：原件未关联");
+    expect(text).not.toContain("999.99");
   });
 });

@@ -469,6 +469,87 @@ export function buildSummaryText(
   return lines.join("\n");
 }
 
+export const statementKeys = [
+  "totalFen",
+  "poolingFen",
+  "criticalIllnessFen",
+  "assistanceFen",
+  "cashFen",
+] as const satisfies readonly AmountKey[];
+
+export type StatementKey = (typeof statementKeys)[number] | "aid";
+
+export type StatementLine = {
+  entryId: string;
+  entryNumber: number;
+  title: string;
+  dateLabel: string;
+  fen: number;
+  sourceLabel: string;
+};
+
+export type StatementRow = {
+  key: StatementKey;
+  label: string;
+  fen: number;
+  lines: StatementLine[];
+};
+
+export type CostStatement = { entryCount: number; rows: StatementRow[] };
+
+export function buildCostStatement(
+  entries: ExpenseEntry[],
+  sourceLabel: (entry: ExpenseEntry) => string,
+): CostStatement {
+  const confirmed = entries.filter((entry) => entry.confirmed);
+  const keys: StatementKey[] = [...statementKeys, "aid"];
+  const rows = keys.map((key) => {
+    const lines: StatementLine[] = [];
+    confirmed.forEach((entry) => {
+      const fen = key === "aid" ? aidAmountFen(entry) : entryAmountFen(entry, key);
+      if (fen === null) return;
+      lines.push({
+        entryId: entry.id,
+        entryNumber: entries.indexOf(entry) + 1,
+        title: entry.title || entry.category,
+        dateLabel: entryDateLabel(entry),
+        fen,
+        sourceLabel: sourceLabel(entry) || "原件未关联",
+      });
+    });
+    return {
+      key,
+      label: key === "aid" ? "已到账公益救助" : amountLabels[key],
+      fen: lines.reduce((sum, line) => sum + line.fen, 0),
+      lines,
+    };
+  });
+  return { entryCount: confirmed.length, rows };
+}
+
+export function costStatementText(statement: CostStatement): string {
+  const lines = [
+    "费用说明（家庭自行整理）",
+    `口径：仅含已确认的 ${statement.entryCount} 笔账目；每个数字只来自票据或到账记录上明确写出的金额，不做相减或推算；未记录的不补零。`,
+    "",
+  ];
+  statement.rows.forEach((row) => {
+    if (!row.lines.length) {
+      lines.push(`${row.label}：未记录`);
+      return;
+    }
+    lines.push(`${row.label}：¥${yuanCell(row.fen)}（覆盖 ${row.lines.length} 笔）`);
+    row.lines.forEach((line) => {
+      lines.push(
+        `   第 ${line.entryNumber} 笔 ${line.title} · ${line.dateLabel} · ¥${yuanCell(line.fen)} · 原件：${line.sourceLabel}`,
+      );
+    });
+  });
+  lines.push("");
+  lines.push("说明：本说明由家庭根据自有票据整理，不代表任何机构的审核结果。");
+  return lines.join("\n");
+}
+
 export function createBackup(
   entries: ExpenseEntry[],
   options: {
