@@ -65,6 +65,10 @@ const sources = [
     url: "https://fuwu.nhsa.gov.cn/",
   },
   {
+    label: "全国行政区划名录（2023-06-30 快照，仅用于选择参保地）",
+    url: "https://github.com/modood/Administrative-divisions-of-China",
+  },
+  {
     label: "中国红十字基金会（小天使基金）",
     url: "https://www.crcf.org.cn/",
   },
@@ -74,7 +78,19 @@ const sources = [
   },
   {
     label: "新华网：用爱心托起生命的希望（中国网转载）",
-    url: "http://news.china.com.cn/2026-11/11/content_118770857.shtml",
+    url: "https://news.china.com.cn/2026-11/11/content_118770857.shtml",
+  },
+  {
+    label: "新快报：白血病治疗进入关键阶段 患儿家庭为治疗费用发愁（新浪财经转载）",
+    url: "https://finance.sina.com.cn/tech/roll/2026-07-28/doc-inikhpyq8290628.shtml",
+  },
+  {
+    label: "中国新闻网：关注家庭困难白血病患儿 各方携手助患儿过难关（新浪新闻转载）",
+    url: "https://news.sina.cn/2021-11-24/detail-iktzscyy7537293.d.html",
+  },
+  {
+    label: "新京报：走出「小白村」，白血病患儿重返校园之路（腾讯新闻转载）",
+    url: "https://news.qq.com/rain/a/20210601A023CH00",
   },
 ];
 
@@ -142,7 +158,7 @@ export default function AboutPage() {
             ))}
           </ul>
           <p className="meta-line" style={{ marginTop: 12 }}>
-            「同路人」页面摘自已公开发布的新闻报道，只保留与就医整理相关的事实，并标注报道来源、发布日期和本站核对日期。报道中的孩子姓名按原文使用；部分报道说明为化名。本站不收款、不提供捐赠入口，不审核、代办或代发筹款项目，也不为任何家庭背书。
+            「同路人」页面摘自已公开发布的新闻报道，只保留与就医整理相关的事实，并标注报道来源、发布日期和本站核对日期。本页已对未成年人姓名和具体地点做去标识化处理，来源链接保留以便回原文核对。本站不收款、不提供捐赠入口，不审核、代办或代发筹款项目，也不为任何家庭背书。
           </p>
         </div>
       </section>
@@ -175,6 +191,7 @@ export default function AboutPage() {
             <li>票据识别和账本记录都在浏览器内完成，不把家长的票据发送给外部识别服务。</li>
             <li>首版每批最多 20 个文件、单文件 20 MB。这是网站处理限制，不是官方申报要求。</li>
             <li>原始文件独立保留，下载内容与导入字节一致；旋转、放大和识别使用副本。</li>
+            <li>同路人故事来自公开报道，已对未成年人姓名、具体地点和精确日期做去标识化处理；不展示正脸、证件号、病历号或完整住址。</li>
             <li>
               演示工作区与真实工作区分开保存：首页「用示例体验」载入虚构票据，顶部横幅可返回真实工作区。演示备份只能恢复到演示工作区，真实备份也不能导入演示。
             </li>
@@ -212,10 +229,6 @@ export default function AboutPage() {
           </p>
         </div>
       </section>
-
-      <p className="notice">
-        公开政策以来源原文为准。数据或来源无法确认的内容会显示「待核对」，不生成可疑数字或通用治疗时长。
-      </p>
     </>
   );
 }

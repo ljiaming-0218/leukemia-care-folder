@@ -5,6 +5,7 @@ const navItems = [
   { to: "/learn", label: "白血病科普" },
   { to: "/resources", label: "医保和救助" },
   { to: "/stories", label: "同路人" },
+  { to: "/fundraising", label: "筹款准备" },
   { to: "/receipts", label: "票据导入" },
   { to: "/ledger", label: "家庭费用" },
   { to: "/prepare", label: "提交准备" },

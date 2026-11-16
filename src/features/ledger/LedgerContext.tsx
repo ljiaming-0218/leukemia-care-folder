@@ -23,7 +23,11 @@ type LedgerContextValue = {
   updateEntry: (id: string, patch: Partial<ExpenseEntry>) => AddResult;
   removeEntry: (id: string) => void;
   setConfirmed: (id: string, confirmed: boolean) => void;
-  replaceEntries: (entries: ExpenseEntry[], meta: ImportMeta) => void;
+  replaceEntries: (
+    target: WorkspaceMode,
+    entries: ExpenseEntry[],
+    meta: ImportMeta,
+  ) => void;
   clearLedger: () => void;
   lastImport: ImportMeta | null;
   loadDemoEntries: (next: ExpenseEntry[]) => void;
@@ -126,11 +130,11 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
   );
 
   const replaceEntries = useCallback(
-    (next: ExpenseEntry[], meta: ImportMeta) => {
-      setEntriesFor(mode, () => next);
-      setLastImportByMode((previous) => ({ ...previous, [mode]: { ...meta } }));
+    (target: WorkspaceMode, next: ExpenseEntry[], meta: ImportMeta) => {
+      setEntriesFor(target, () => next);
+      setLastImportByMode((previous) => ({ ...previous, [target]: { ...meta } }));
     },
-    [mode, setEntriesFor],
+    [setEntriesFor],
   );
 
   const clearLedger = useCallback(() => {

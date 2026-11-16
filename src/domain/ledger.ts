@@ -154,6 +154,16 @@ export const ledgerBackupSchema = z.object({
 export type LedgerBackup = z.infer<typeof ledgerBackupSchema>;
 export type LedgerBackupEntry = z.infer<typeof ledgerBackupEntrySchema>;
 
+export function workspaceMismatchMessage(
+  backupMode: "real" | "demo",
+  currentMode: "real" | "demo",
+): string | null {
+  if (backupMode === currentMode) return null;
+  return backupMode === "demo"
+    ? "这份备份来自演示工作区，不能在真实工作区恢复。请先进入演示工作区再导入。"
+    : "这份备份来自真实工作区，不能在演示工作区恢复。请返回真实工作区再导入。";
+}
+
 export function createEmptyAmounts(): Record<AmountKey, AmountRecord> {
   return Object.fromEntries(
     amountKeys.map((key) => [key, { value: "", status: "未记录" as AmountStatus }]),
@@ -184,6 +194,24 @@ export function entryHasSource(entry: ExpenseEntry): boolean {
 
 export function entryNeedsOriginals(entry: ExpenseEntry): boolean {
   return entry.documentIds.length === 0 && entry.sourceIndexes.length > 0;
+}
+
+export function sourceIndexesAfterSelection(args: {
+  previousDocumentIds: string[];
+  previousSourceIndexes: number[];
+  nextDocumentIds: string[];
+  docs: { id: string }[];
+  keepRestoredWhenEmpty: boolean;
+}): number[] {
+  if (!args.nextDocumentIds.length) {
+    const stillRestored =
+      args.keepRestoredWhenEmpty && args.previousDocumentIds.length === 0;
+    return stillRestored ? args.previousSourceIndexes : [];
+  }
+  return args.nextDocumentIds
+    .map((id) => args.docs.findIndex((doc) => doc.id === id) + 1)
+    .filter((index) => index > 0)
+    .sort((left, right) => left - right);
 }
 
 export function entryAmountFen(entry: ExpenseEntry, key: AmountKey): number | null {

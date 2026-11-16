@@ -12,7 +12,7 @@ import { usePageTitle } from "@/src/lib/usePageTitle";
 
 const basisNotes: Record<string, string> = {
   公告写明: "公告直接列出的材料，逐份核对原件与项目名称。",
-  请在官方入口确认: "材料种类和提交方式以支付宝页面实际要求为准，网页只记录勾选状态。",
+  请在官方入口确认: "材料种类和提交方式以支付宝页面为准。",
 };
 
 export default function PreparePage() {
@@ -63,7 +63,7 @@ export default function PreparePage() {
       <PageHeader
         eyebrow="提交准备 · 景宁第五期「小鹿灯」"
         title="按材料分区逐项核对"
-        lead="清单分成「公告写明」和「请在官方入口确认」两组。网页只记录家长自己的核对状态和关联原件，不判断资格，也不代表材料齐全。"
+        lead="清单分成「公告写明」和「请在官方入口确认」两组，页内只记录你的核对状态和关联原件。"
       />
 
       <article className="card" style={{ marginTop: "calc(22px * var(--site-space))" }}>
@@ -91,9 +91,7 @@ export default function PreparePage() {
         </dl>
         <div className="callout">
           <p className="callout__title">截止时刻与受理状态</p>
-          <p>
-            公告没有公开具体截止时刻和实时受理状态。提交前请在支付宝页面确认，或拨打公告中的热线。
-          </p>
+          <p>公告未公开具体截止时刻和实时受理状态，提交前以支付宝页面或公告热线为准。</p>
         </div>
         <div className="btn-row">
           <a
@@ -130,9 +128,7 @@ export default function PreparePage() {
         >
           <div className="progress-bar" style={{ width: `${percent}%` }} />
         </div>
-        <p className="meta-line">
-          已关联 {linkedTotal} 份原件。关联原件只方便提交时查找，不改变材料核对状态，也不代表官方已认可。
-        </p>
+        <p className="meta-line">已关联 {linkedTotal} 份原件。</p>
         <div className="btn-row btn-row--tight">
           <button type="button" className="btn btn--ghost btn--small" onClick={reset}>
             清空本页核对状态与关联
@@ -243,9 +239,9 @@ export default function PreparePage() {
                     {openPicker === item.id && (
                       <div className="material-picker">
                         <p className="meta-line">
-                          只做本页关联，不上传文件。多次选择同一份不会重复关联。
+                          同一份不会重复关联。
                           {item.id === "m-applied-receipts"
-                            ? " 已在小鹿灯相关账目中确认的票据排在前面，金额以账本口径为准。"
+                            ? " 账本中已确认的票据排在前面。"
                             : ""}
                         </p>
                         {sortedDocs.length ? (
@@ -305,7 +301,7 @@ export default function PreparePage() {
       })}
 
       <p className="notice">
-        本页记录和原件关联只在当前页面会话中保留，离开或刷新后需要重新选择。已提交状态由家长在支付宝页面确认后自行判断，网页不会自动识别提交结果。附件格式按支付宝页面实际说明执行。
+        本页状态只在当前页面会话中保留。是否已提交由你在支付宝页面确认后自行设置。
       </p>
 
       <div className="btn-row">

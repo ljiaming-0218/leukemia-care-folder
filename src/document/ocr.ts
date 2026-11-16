@@ -1,4 +1,4 @@
-import Tesseract from "tesseract.js";
+import type Tesseract from "tesseract.js";
 import { DocumentError } from "./errors";
 
 type TessWorker = Tesseract.Worker;
@@ -12,16 +12,20 @@ function assetUrl(path: string): string {
 
 async function getWorker(): Promise<TessWorker> {
   if (!workerPromise) {
-    workerPromise = Tesseract.createWorker(["chi_sim", "eng"], 1, {
-      workerPath: assetUrl("ocr/worker.min.js"),
-      corePath: assetUrl("ocr/core"),
-      langPath: assetUrl("ocr/lang"),
-      cacheMethod: "none",
-      logger: (message) => activeLogger?.(message),
-    }).catch((error) => {
-      workerPromise = null;
-      throw error;
-    });
+    workerPromise = import("tesseract.js")
+      .then(({ default: Tesseract }) =>
+        Tesseract.createWorker(["chi_sim", "eng"], 1, {
+          workerPath: assetUrl("ocr/worker.min.js"),
+          corePath: assetUrl("ocr/core"),
+          langPath: assetUrl("ocr/lang"),
+          cacheMethod: "none",
+          logger: (message) => activeLogger?.(message),
+        }),
+      )
+      .catch((error) => {
+        workerPromise = null;
+        throw error;
+      });
   }
   return workerPromise;
 }

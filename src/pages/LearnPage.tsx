@@ -156,7 +156,7 @@ export default function LearnPage() {
         <>
           <KnowledgeGraph />
           <p className="notice">
-            连线表示概念之间的阅读关系，用来帮助理解报告和就诊流程，不代表诊断结论、治疗顺序或因果。具体判断以医生和官方原文为准。
+            连线只表示概念之间的阅读关系，不是诊断结论或治疗顺序；具体判断以医生和原文为准。
           </p>
         </>
       ) : null}
@@ -227,7 +227,7 @@ export default function LearnPage() {
               命中 {filtered.length} 张卡片
             </p>
             <p className="result-bar__meta">
-              共收录 {knowledgeCards.length} 张 · 每张含分层解释与出处 · 有疑问的内容会标注「待核对」
+              共收录 {knowledgeCards.length} 张 · 每张含分层解释与出处
             </p>
           </div>
 

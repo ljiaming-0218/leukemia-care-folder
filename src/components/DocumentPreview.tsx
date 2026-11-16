@@ -175,7 +175,7 @@ export function DocumentPreview({ doc, index, initialPage, onClose }: DocumentPr
           {doc.previewKind === "none" && (
             <div className="preview-fallback">
               <p className="notice notice--warn">
-                当前浏览器不能预览这种格式（如 OFD、HEIC 或受保护的 PDF）。原件已保留，可下载后查看。识别请手工填写，或换一份 JPG、PNG、PDF 副本。
+                这种格式无法预览（如 OFD、HEIC 或受保护的 PDF）。原件已保留，下载后可查看，字段可手工填写。
               </p>
               <button type="button" className="btn btn--primary" onClick={download}>
                 下载原件

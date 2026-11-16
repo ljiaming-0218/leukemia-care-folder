@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DemoBanner } from "@/src/components/DemoBanner";
 import { SiteHeader } from "@/src/components/SiteHeader";
@@ -8,32 +8,76 @@ import { DocumentsProvider } from "@/src/features/documents/DocumentsContext";
 import { LedgerProvider } from "@/src/features/ledger/LedgerContext";
 import { PrepareStateProvider } from "@/src/features/prepare/PrepareStateContext";
 import { DemoWorkspaceLoader } from "@/src/features/workspace/DemoWorkspaceLoader";
-import { WorkspaceProvider } from "@/src/features/workspace/WorkspaceContext";
-import HomePage from "@/src/pages/HomePage";
-import LearnPage from "@/src/pages/LearnPage";
-import ResourcesPage from "@/src/pages/ResourcesPage";
-import ReceiptsPage from "@/src/pages/ReceiptsPage";
-import LedgerPage from "@/src/pages/LedgerPage";
-import PreparePage from "@/src/pages/PreparePage";
-import StoriesPage from "@/src/pages/StoriesPage";
-import AboutPage from "@/src/pages/AboutPage";
+import { useWorkspace, WorkspaceProvider } from "@/src/features/workspace/WorkspaceContext";
 import { scrollToElement } from "@/src/lib/scrollToElement";
+
+const HomePage = lazy(() => import("@/src/pages/HomePage"));
+const LearnPage = lazy(() => import("@/src/pages/LearnPage"));
+const ResourcesPage = lazy(() => import("@/src/pages/ResourcesPage"));
+const ReceiptsPage = lazy(() => import("@/src/pages/ReceiptsPage"));
+const LedgerPage = lazy(() => import("@/src/pages/LedgerPage"));
+const PreparePage = lazy(() => import("@/src/pages/PreparePage"));
+const StoriesPage = lazy(() => import("@/src/pages/StoriesPage"));
+const FundraisingPage = lazy(() => import("@/src/pages/FundraisingPage"));
+const AboutPage = lazy(() => import("@/src/pages/AboutPage"));
 
 function ScrollToAnchor() {
   const { pathname, hash } = useLocation();
 
   useEffect(() => {
-    if (hash) {
+    if (!hash) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    let attempts = 0;
+    let timer = 0;
+    let cancelled = false;
+    const tryScroll = () => {
+      if (cancelled) return;
       const target = document.getElementById(hash.slice(1));
       if (target) {
         scrollToElement(target);
         return;
       }
-    }
-    window.scrollTo(0, 0);
+      if (attempts >= 40) return;
+      attempts += 1;
+      timer = window.setTimeout(tryScroll, 50);
+    };
+    tryScroll();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [pathname, hash]);
 
   return null;
+}
+
+function WorkspaceRoutes() {
+  const { mode } = useWorkspace();
+
+  return (
+    <Suspense
+      fallback={
+        <p className="route-loading" role="status">
+          正在打开页面…
+        </p>
+      }
+    >
+      <Routes key={mode}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/learn" element={<LearnPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/receipts" element={<ReceiptsPage />} />
+        <Route path="/ledger" element={<LedgerPage />} />
+        <Route path="/prepare" element={<PreparePage />} />
+        <Route path="/stories" element={<StoriesPage />} />
+        <Route path="/fundraising" element={<FundraisingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
+  );
 }
 
 export default function App() {
@@ -59,17 +103,7 @@ export default function App() {
               <SiteHeader />
               <DemoBanner />
               <main id="main-content" className="site-main" tabIndex={-1}>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/learn" element={<LearnPage />} />
-                  <Route path="/resources" element={<ResourcesPage />} />
-                  <Route path="/receipts" element={<ReceiptsPage />} />
-                  <Route path="/ledger" element={<LedgerPage />} />
-                  <Route path="/prepare" element={<PreparePage />} />
-                  <Route path="/stories" element={<StoriesPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
+                <WorkspaceRoutes />
               </main>
               <footer className="site-footer">
                 <div className="site-footer__inner">

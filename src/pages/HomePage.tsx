@@ -35,14 +35,14 @@ const entries = [
     to: "/stories",
     index: "04",
     title: "看看同路人",
-    desc: "三个来自公开报道的家庭，记录他们怎么面对异地求医、费用和照护安排。",
+    desc: "来自公开报道的七个家庭，记录他们怎么面对异地求医、费用、复学和照护安排。",
     go: "读故事",
   },
 ];
 
 export default function HomePage() {
   usePageTitle("首页");
-  const { isDemo, demoStatus, enterDemo, reloadDemo } = useWorkspace();
+  const { isDemo, demoStatus, enterDemo, reloadDemo, exitDemo } = useWorkspace();
   const { open: openAssistant } = useAssistant();
 
   return (
@@ -80,59 +80,37 @@ export default function HomePage() {
           </div>
         </div>
 
-        <aside className="hero-file" aria-label="资料夹索引">
+        <aside className="hero-file hero-file--workspace" aria-label="当前工作区">
           <div className="hero-file__top">
-            <span>你的资料夹</span>
+            <span>当前工作区</span>
             <span className="hero-file__badge">本机会话</span>
           </div>
-          <Link className="hero-file__row" to="/learn">
-            <span className="hero-file__icon" aria-hidden="true">
-              知
-            </span>
-            <span className="hero-file__text">
-              <b>看懂术语</b>
-              <small>图谱 · 主题卡 · 术语表</small>
-            </span>
-            <span className="hero-file__arrow" aria-hidden="true">
-              →
-            </span>
-          </Link>
-          <Link className="hero-file__row" to="/resources">
-            <span className="hero-file__icon" aria-hidden="true">
-              保
-            </span>
-            <span className="hero-file__text">
-              <b>查清入口</b>
-              <small>国家 · 浙江 · 景宁</small>
-            </span>
-            <span className="hero-file__arrow" aria-hidden="true">
-              →
-            </span>
-          </Link>
-          <Link className="hero-file__row" to="/receipts">
-            <span className="hero-file__icon" aria-hidden="true">
-              票
-            </span>
-            <span className="hero-file__text">
-              <b>收好票据</b>
-              <small>导入 · 核对 · 汇总</small>
-            </span>
-            <span className="hero-file__arrow" aria-hidden="true">
-              →
-            </span>
-          </Link>
-          <Link className="hero-file__row" to="/stories">
-            <span className="hero-file__icon" aria-hidden="true">
-              路
-            </span>
-            <span className="hero-file__text">
-              <b>看看同路人</b>
-              <small>故事 · 筹款核对</small>
-            </span>
-            <span className="hero-file__arrow" aria-hidden="true">
-              →
-            </span>
-          </Link>
+          <div className="hero-file__state">
+            <b>{isDemo ? "演示工作区" : "真实工作区"}</b>
+            <p>
+              {isDemo
+                ? "正在查看景宁家庭的虚构票据与账目，修改不会影响真实资料。"
+                : "票据、账目和材料只保存在当前浏览器会话；离开前可导出 CSV 或账本备份。"}
+            </p>
+          </div>
+          <div className="hero-file__actions">
+            <Link
+              className="btn btn--primary btn--small"
+              to="/receipts"
+              onClick={isDemo ? reloadDemo : enterDemo}
+            >
+              {demoStatus === "loading"
+                ? "正在载入示例…"
+                : isDemo
+                  ? "重新载入示例"
+                  : "载入示例并看票据"}
+            </Link>
+            {isDemo ? (
+              <button type="button" className="btn btn--ghost btn--small" onClick={exitDemo}>
+                退出演示
+              </button>
+            ) : null}
+          </div>
           <p className="hero-file__foot">
             文件只在本机浏览器处理
             <span aria-hidden="true"> · </span>
@@ -159,38 +137,19 @@ export default function HomePage() {
               <span className="entry-card__go">{entry.go} →</span>
             </Link>
           ))}
-          <Link
-            to="/receipts"
-            className="entry-card entry-card--demo"
-            onClick={isDemo ? reloadDemo : enterDemo}
-          >
-            <span className="entry-card__index">05</span>
-            <span className="entry-card__title">
-              {isDemo ? "重新载入演示" : "用示例体验"}
-            </span>
-            <span className="entry-card__desc">
-              {isDemo
-                ? "重新载入会替换当前演示工作区的票据、账目和材料状态；真实工作区不受影响。"
-                : "载入景宁家庭的四份虚构票据、三笔账目和材料清单；演示数据与真实工作区分离，可随时退出。"}
-            </span>
-            <span className="entry-card__go">
-              {demoStatus === "loading"
-                ? "正在载入演示…"
-                : isDemo
-                  ? "重新载入 →"
-                  : "进入演示 →"}
-            </span>
-          </Link>
         </div>
+        <p className="home-demo-note">
+          想先看效果？首页上方的工作区可以载入景宁家庭的虚构示例；演示与真实资料分开保存，可随时退出。
+        </p>
       </section>
 
       <section className="section" aria-labelledby="story-preview-title">
         <div className="section__head">
           <div>
             <h2 className="section__title" id="story-preview-title">
-              同路人的这一年
+              公开报道里的同路人
             </h2>
-            <p className="section__note">公开报道摘录，读方法，不读“标准答案”。</p>
+            <p className="section__note">七个来自公开报道的家庭，已做去标识化处理；读方法，不读“标准答案”。</p>
           </div>
           <Link className="section__link" to="/stories">
             全部故事 →
@@ -198,7 +157,7 @@ export default function HomePage() {
         </div>
         <div className="story-grid">
           {stories.slice(0, 2).map((story) => (
-            <StoryCard key={story.id} story={story} compact />
+            <StoryCard key={story.id} story={story} />
           ))}
         </div>
       </section>
@@ -227,13 +186,6 @@ export default function HomePage() {
           </li>
         </ol>
       </section>
-
-      <p className="status-strip" role="status">
-        当前版本：3D 科普图谱、AI 小助手、全国医保资料、票据导入与浏览器内识别、家庭费用账本、备份恢复、小鹿灯提交准备、公开报道同路人和众筹准备助手均已可用；所有文件只在当前浏览器会话中处理。
-      </p>
-      <p className="notice">
-        票据和账本只保存在当前浏览器会话中；公开政策以来源原文为准，无法确认的内容显示「待核对」。
-      </p>
     </>
   );
 }

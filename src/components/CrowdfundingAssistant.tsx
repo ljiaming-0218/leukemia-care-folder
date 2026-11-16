@@ -15,14 +15,14 @@ const platforms = [
     name: "水滴筹",
     url: "https://www.shuidichou.com/",
     kind: "个人大病求助平台",
-    note: "是否可发起、需要哪些材料、如何审核，以平台当前页面为准。本站不代发、不收款。",
+    note: "是否可发起、需要哪些材料、如何审核，以平台当前页面为准。",
   },
   {
     id: "qschou",
     name: "轻松筹",
     url: "https://www.qschou.com/",
     kind: "个人大病求助平台",
-    note: "是否可发起、需要哪些材料、如何审核，以平台当前页面为准。本站不代发、不收款。",
+    note: "是否可发起、需要哪些材料、如何审核，以平台当前页面为准。",
   },
 ] as const;
 
@@ -113,7 +113,7 @@ export function CrowdfundingAssistant() {
             众筹准备助手
           </h2>
           <p className="section__note">
-            从家庭账本里取已确认的分类合计，生成一份可核对的筹款说明草稿。只在本机生成和复制，不会自动发布、提交或上传任何资料。
+            从家庭账本里取已确认的分类合计，生成一份可核对的筹款说明草稿。只在本机生成和复制。
           </p>
         </div>
       </div>
@@ -164,7 +164,7 @@ export function CrowdfundingAssistant() {
 
           <p className="field__hint">
             {isDemo ? "当前是演示工作区，带入的是虚构账目。" : "当前是真实工作区。"}
-            只有家长已确认的账目参与合计；没有记录的金额保持“未记录”，不补零、不按比例推算。
+            只统计家长已确认的账目；没有记录的金额保持「未记录」。
           </p>
 
           <div className="btn-row">
@@ -207,12 +207,12 @@ export function CrowdfundingAssistant() {
             placeholder="点击「一键生成并复制筹款说明」，这里会出现草稿。"
           />
           <p className="field__hint">
-            发布前请自己核对：金额与票据一致，用途写具体，不公开孩子正脸、证件号、病历号、联系方式或完整住址。
+            发布前核对金额与票据、用途写具体；不公开孩子正脸、证件号、病历号或住址。
           </p>
           <p className="field__hint">
             已经有票据或账目？先到
             <Link to="/ledger">家庭费用</Link>
-            确认账目，再回来生成。草稿只包含分类合计和笔数，不包含姓名和票据内容。
+            确认账目，再回来生成。草稿只含分类合计和笔数。
           </p>
         </div>
       </div>

@@ -503,7 +503,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
     answer: [
       "儿童通常随家庭参加城乡居民基本医疗保险，按参保地规定缴费和享受待遇；具体参保时间、缴费标准和办理渠道由当地确定。",
       "参保地一般按户籍地或常住地确定。孩子跨省就医前，先确认参保地和备案要求，不要把就医医院所在地当成待遇计算地。",
-      "医保资料页已收录全国统一制度，并提供 31 个省级地区的参保地目录。除浙江、景宁外，地方起付线、比例和认定材料尚未逐条核对，页面显示「待核对」，请通过国家医保服务平台、12393 或参保地医保部门确认。",
+      "医保资料页已收录全国统一制度，并提供 31 个省级地区、地市和区县的参保地目录。先选到具体参保地再显示匹配资料；除浙江、景宁外，地方起付线、比例和认定材料尚未逐条核对，页面显示「待核对」，请通过国家医保服务平台、12393 或参保地医保部门确认。",
     ],
     sections: [
       {
@@ -1058,7 +1058,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
     ],
     keywords: ["同路人", "故事", "励志", "筹款", "众筹", "募捐", "公开募捐", "慈善中国", "捐赠", "善款", "个人求助", "水滴筹", "轻松筹", "基金会"],
     answer: [
-      "「同路人」页的三个家庭来自已公开发表的新闻报道，分别来自东南网（福建日报）和新华网。页面只摘录报道里能核对的事实，标注来源、报道发布日期和本站核对日期；报道中的孩子姓名按原文使用，部分报道说明为化名。故事不能当作治疗、预后或筹款建议。",
+      "「同路人」页的七个家庭来自已公开发表的新闻报道，分别来自东南网（福建日报）、新华网、新快报、中国新闻网和新京报。页面只摘录报道里能核对的事实，标注来源、报道发布日期和本站核对日期；未成年人姓名、具体地点和精确日期已做去标识化处理，来源链接保留以便回原文核对。故事不能当作治疗、预后或筹款建议。",
       "如果身边家庭确实需要筹措费用，先分清「向官方项目申请救助」和「面向公众公开募捐」：前者按公告向项目方提交材料；后者依法要由具有公开募捐资格的慈善组织发起，个人不能自行开展公开募捐。站内的众筹准备助手只在本机生成说明草稿，不代发、不收款。",
     ],
     sections: [
@@ -1090,7 +1090,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
     sources: [SOURCE.charityChina, SOURCE.mca, SOURCE.crcf, SOURCE.fjsenStory, SOURCE.xinhuaStory, SOURCE.site],
     actions: [
       { label: "看同路人故事", to: "/stories" },
-      { label: "打开众筹准备助手", to: "/stories#crowdfunding-assistant" },
+      { label: "打开众筹准备助手", to: "/fundraising#crowdfunding-assistant" },
       { label: "看小鹿灯资料卡", to: "/resources#jingning-xiaoludeng-phase5" },
     ],
   },

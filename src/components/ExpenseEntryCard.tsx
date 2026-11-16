@@ -44,6 +44,7 @@ export function ExpenseEntryCard({
       return docIndex >= 0 ? { doc: docs[docIndex], docIndex } : null;
     })
     .filter((item): item is { doc: LocalDocument; docIndex: number } => item !== null);
+  const missingCount = entry.documentIds.length - linked.length;
 
   return (
     <article className="entry-card" id={`entry-${entry.id}`}>
@@ -59,8 +60,12 @@ export function ExpenseEntryCard({
             <span className={`tag tag--${entry.dateStatus === "已确认" ? "muted" : "warn"}`}>
               {entryDateLabel(entry)}
             </span>
-            <span className="tag tag--muted">
-              {linked.length ? `关联 ${linked.length} 份原件` : "原件未关联"}
+            <span className={`tag ${missingCount > 0 ? "tag--warn" : "tag--muted"}`}>
+              {linked.length
+                ? `关联 ${linked.length} 份原件${missingCount > 0 ? `，缺失 ${missingCount} 份` : ""}`
+                : missingCount > 0
+                  ? `原件缺失 ${missingCount} 份`
+                  : "原件未关联"}
             </span>
           </div>
         </div>
@@ -143,12 +148,16 @@ export function ExpenseEntryCard({
               </li>
             ))}
           </ul>
+        ) : missingCount > 0 ? (
+          <p className="notice notice--warn">
+            有 {missingCount} 份已关联原件已从票据页移除，金额仍保留。可编辑账目重新关联。
+          </p>
         ) : entryNeedsOriginals(entry) ? (
           <p className="notice">
-            原件未关联。备份中记录的来源序号为第 {entry.sourceIndexes.join("、")} 份；恢复的金额继续按已确认口径统计。提交前请重新选取要提交的原件。
+            原件未关联；备份来源序号为第 {entry.sourceIndexes.join("、")} 份。提交前请重新选取原件。
           </p>
         ) : (
-          <p className="notice">这笔账目还没有关联原件。可编辑账目后选择已核对的原件。</p>
+          <p className="notice">还没有关联原件。可编辑账目后选择已核对的原件。</p>
         )}
       </div>
 

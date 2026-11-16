@@ -94,7 +94,6 @@ function demoFields(values: Record<FieldKey, string>) {
       value: values[key],
       origin: "识别",
       page: 1,
-      snippet: "演示用虚构样张",
     };
   });
   return fields;
@@ -120,10 +119,9 @@ async function loadDocument(asset: DemoAsset): Promise<LocalDocument> {
     ocrState: "已识别",
     progress: 1,
     pageCount: 1,
-    ocrNote: "演示票据：字段为虚构预填值，可逐项重新核对。",
     fields: demoFields(asset.fields),
     confirmed: true,
-    dismissedFlags: [],
+    dismissedFlags: ["same-amount-date"],
   };
 }
 

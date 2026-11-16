@@ -22,6 +22,7 @@ import {
   summarizeByMonth,
   summarizeEntries,
   unknownMonthLabel,
+  workspaceMismatchMessage,
   type AmountSummary,
   type ExpenseCategory,
   type LedgerBackup,
@@ -29,7 +30,7 @@ import {
 import { formatFen, safeDownloadName, type LocalDocument } from "@/src/domain/documents";
 import { useDocuments } from "@/src/features/documents/DocumentsContext";
 import { downloadStamp, localToday, useLedger } from "@/src/features/ledger/LedgerContext";
-import { useWorkspace } from "@/src/features/workspace/WorkspaceContext";
+import { useWorkspace, type WorkspaceMode } from "@/src/features/workspace/WorkspaceContext";
 import { downloadOriginal, downloadText } from "@/src/lib/download";
 import { usePageTitle } from "@/src/lib/usePageTitle";
 
@@ -99,6 +100,7 @@ export default function LedgerPage() {
   const [pendingImport, setPendingImport] = useState<{
     backup: LedgerBackup;
     fingerprint: string;
+    targetMode: WorkspaceMode;
   } | null>(null);
   const [importError, setImportError] = useState("");
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -232,12 +234,9 @@ export default function LedgerPage() {
       resetInput();
       return;
     }
-    if (parsed.data.mode !== mode) {
-      setImportError(
-        parsed.data.mode === "demo"
-          ? "这份备份来自演示工作区，不能在真实工作区恢复。请先进入演示工作区再导入。"
-          : "这份备份来自真实工作区，不能在演示工作区恢复。请返回真实工作区再导入。",
-      );
+    const mismatch = workspaceMismatchMessage(parsed.data.mode, mode);
+    if (mismatch) {
+      setImportError(mismatch);
       resetInput();
       return;
     }
@@ -247,14 +246,25 @@ export default function LedgerPage() {
       resetInput();
       return;
     }
-    setPendingImport({ backup: parsed.data, fingerprint });
+    setPendingImport({ backup: parsed.data, fingerprint, targetMode: mode });
     resetInput();
   };
 
   const confirmImport = () => {
     if (!pendingImport) return;
+    if (pendingImport.targetMode !== mode) {
+      setPendingImport(null);
+      setImportError("工作区已切换，导入已取消。请回到原工作区或重新选择备份。");
+      return;
+    }
+    const mismatch = workspaceMismatchMessage(pendingImport.backup.mode, mode);
+    if (mismatch) {
+      setPendingImport(null);
+      setImportError(mismatch);
+      return;
+    }
     const restored = backupToEntries(pendingImport.backup);
-    replaceEntries(restored, {
+    replaceEntries(pendingImport.targetMode, restored, {
       fingerprint: pendingImport.fingerprint,
       exportedAt: pendingImport.backup.exportedAt,
     });
@@ -295,11 +305,11 @@ export default function LedgerPage() {
       <PageHeader
         eyebrow="家庭费用与票据夹 · 第二步"
         title="按一次就诊记账，金额各记各的"
-        lead="账本按家长确认的就诊批次或独立支出建立。住院发票、费用清单和结算单可以归入同一笔，同一份原件最多计入一次。费用、支付和已到账救助分别记录，不用假定比例互相推算。"
+        lead="账本按家长确认的就诊批次或独立支出建立。同一次住院的发票、费用清单和结算单可归入一笔，同一份原件最多计入一次。"
       />
 
       <p className="notice" role="note">
-        当前为{modeLabel}，账本只在当前页面会话中保留。离开前可导出 CSV 费用表或账本备份；备份包含家庭费用，请妥善保存。当前没有上传接口，账目不会发送到网络。
+        当前为{modeLabel}，账本只在当前页面会话中保留。离开前可导出 CSV 或账本备份。
       </p>
 
       <div className="status-strip" role="status">
@@ -352,7 +362,7 @@ export default function LedgerPage() {
             </p>
           </div>
           <p className="meta-line">
-            「个人自付」「个人自费」「其他支付」按票面原标签各自展示，不与统筹支付或个人现金相加。
+            「个人自付」「个人自费」「其他支付」按票面原标签各自展示，不与统筹支付相加。
           </p>
         </section>
       )}
@@ -382,7 +392,7 @@ export default function LedgerPage() {
         <div className="issue-panel" role="note">
           <h2 className="subhead">恢复的账目与当前原件可能有对应关系</h2>
           <p className="meta-line">
-            有 {nearMatchCount} 笔恢复账目与当前已核对原件的费用日期或金额相同。请打开账目逐笔核对归属后再关联；系统不会自动合并或改变金额。
+            有 {nearMatchCount} 笔恢复账目与当前已核对原件的费用日期或金额相同。请打开账目核对归属后再关联。
           </p>
         </div>
       )}
@@ -549,7 +559,7 @@ export default function LedgerPage() {
               </label>
             </div>
             <p className="meta-line">
-              类别按钮上的数字为「已计入/全部账目」。筛选不会改变账本内容或统计口径。
+              类别按钮上的数字为「已计入/全部账目」。
             </p>
 
             {editingEntry && (
@@ -656,7 +666,7 @@ export default function LedgerPage() {
           </div>
           {monthRows.length === 0 && <p className="notice">当前筛选没有已确认账目。</p>}
           <p className="meta-line">
-            每个金额下方标注实际覆盖笔数。费用、支付与救助各列独立，不用假定比例推算；缺失的金额保持「未记录」。
+            每个金额标注实际覆盖笔数；没有记录的项目保持「未记录」。
           </p>
         </section>
       )}
@@ -805,14 +815,14 @@ export default function LedgerPage() {
         )}
 
         <div className="callout">
-          <p className="callout__title">备份与恢复的边界</p>
+          <p className="callout__title">备份与恢复</p>
           <p>
-            备份只含用户确认的结构化费用、日期、类别、来源序号和核对状态，不含原件、原始文件名、OCR 全文、报告正文或身份信息。备份仍包含家庭费用，请妥善保存。恢复的旧费用显示「原件未关联」，金额保留并继续按确认口径参与汇总；实际填写申请时，请重新选取要提交的原件。
+            备份只含已确认的费用、日期、类别、来源序号和核对状态，不含原件、原始文件名、OCR 全文或身份信息。备份包含家庭费用，请妥善保存；恢复的账目显示「原件未关联」，提交前重新选取原件。
           </p>
         </div>
 
         <p className="meta-line">
-          CSV 表头写明统计口径和来源序号，排除姓名、证件号、联系方式和报告正文。打印使用浏览器打印功能，可在打印预览中选择另存为 PDF。
+          CSV 与打印清单只含已确认账目，不含姓名、证件号、联系方式和报告正文。
         </p>
       </section>
 

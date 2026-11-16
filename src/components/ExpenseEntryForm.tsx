@@ -11,6 +11,7 @@ import {
   inferCategoryFromDocs,
   nearMatchReasons,
   primaryAmountKeys,
+  sourceIndexesAfterSelection,
   type AmountKey,
   type AmountRecord,
   type AmountStatus,
@@ -202,15 +203,21 @@ export function ExpenseEntryForm({
   const [aidText, setAidText] = useState(() => fenToYuanInput(initial?.aid.value ?? ""));
   const invalidRef = useRef<Set<AmountKey>>(new Set());
   const formId = useMemo(() => `entry-${draft.id}`, [draft.id]);
+  const keepRestoredWhenEmpty = Boolean(
+    initial && initial.documentIds.length === 0 && initial.sourceIndexes.length > 0,
+  );
+  const missingLinkedIds = draft.documentIds.filter(
+    (id) => !docs.some((doc) => doc.id === id),
+  );
 
   const selectableDocs = useMemo(
     () =>
       docs
         .map((doc, index) => ({ doc, index }))
-        .filter(({ doc }) => doc.confirmed)
         .filter(
           ({ doc }) =>
-            draft.documentIds.includes(doc.id) || !usedDocumentIds.has(doc.id),
+            draft.documentIds.includes(doc.id) ||
+            (doc.confirmed && !usedDocumentIds.has(doc.id)),
         ),
     [docs, draft.documentIds, usedDocumentIds],
   );
@@ -231,12 +238,13 @@ export function ExpenseEntryForm({
       const nextIds = selected
         ? previous.documentIds.filter((id) => id !== docId)
         : [...previous.documentIds, docId];
-      const nextIndexes = nextIds.length
-        ? nextIds
-            .map((id) => docs.findIndex((doc) => doc.id === id) + 1)
-            .filter((index) => index > 0)
-            .sort((a, b) => a - b)
-        : previous.sourceIndexes;
+      const nextIndexes = sourceIndexesAfterSelection({
+        previousDocumentIds: previous.documentIds,
+        previousSourceIndexes: previous.sourceIndexes,
+        nextDocumentIds: nextIds,
+        docs,
+        keepRestoredWhenEmpty,
+      });
       return { ...previous, documentIds: nextIds, sourceIndexes: nextIndexes };
     });
   };
@@ -372,7 +380,7 @@ export function ExpenseEntryForm({
       <div className="entry-form__block">
         <h4 className="subhead">关联原件</h4>
         <p className="meta-line">
-          只列出家长已核对的原件。同一份原件只能归入一笔账目；关联不明时先不选，保留待核对。
+          同一份原件只能归入一笔账目；归属不明确时先不选。
         </p>
         {selectableDocs.length ? (
           <ul className="source-options">
@@ -397,6 +405,9 @@ export function ExpenseEntryForm({
                         费用日期 {doc.fields.expenseDate.value || "待核对"} · 金额{" "}
                         {formatFen(doc.fields.amountFen.value)}
                       </span>
+                      {!doc.confirmed && (
+                        <span className="tag tag--warm">未核对，仍关联在本账目</span>
+                      )}
                       {reasons.length > 0 && (
                         <span className="tag tag--warm">{reasons.join("、")}，请核对归属</span>
                       )}
@@ -408,7 +419,36 @@ export function ExpenseEntryForm({
           </ul>
         ) : (
           <p className="notice">
-            还没有可关联的已核对原件。可以先保存账目，之后在票据页核对后再回来关联。
+            还没有已核对的原件；可先保存账目，之后回来关联。
+          </p>
+        )}
+        {missingLinkedIds.length > 0 && (
+          <p className="notice notice--warn" role="status">
+            有 {missingLinkedIds.length} 份已关联原件已从票据页移除。
+            <button
+              type="button"
+              className="link-button"
+              onClick={() =>
+                setDraft((previous) => {
+                  const nextIds = previous.documentIds.filter(
+                    (id) => !missingLinkedIds.includes(id),
+                  );
+                  return {
+                    ...previous,
+                    documentIds: nextIds,
+                    sourceIndexes: sourceIndexesAfterSelection({
+                      previousDocumentIds: previous.documentIds,
+                      previousSourceIndexes: previous.sourceIndexes,
+                      nextDocumentIds: nextIds,
+                      docs,
+                      keepRestoredWhenEmpty: false,
+                    }),
+                  };
+                })
+              }
+            >
+              清除缺失关联
+            </button>
           </p>
         )}
         {hiddenConfirmed > 0 && (
@@ -424,7 +464,7 @@ export function ExpenseEntryForm({
       <div className="entry-form__block">
         <h4 className="subhead">费用与支付（元）</h4>
         <p className="meta-line">
-          只有原件明确列出，或家长对照凭证后补录，才填写金额。没有的项目保持「未记录」，不补零。
+          按原件或核对后的凭证填写；没有的项目保持「未记录」。
         </p>
         <div className="amount-grid">
           {primaryAmountKeys.map((key) => (
@@ -443,7 +483,7 @@ export function ExpenseEntryForm({
         </div>
         <h4 className="subhead">票面原标签（元）</h4>
         <p className="meta-line">
-          「个人自付」「个人自费」「其他支付」保留票面原标签，各自记录，不与其他支付项目相加推算。
+          「个人自付」「个人自费」「其他支付」按票面原标签记录，不与其他支付项相加。
         </p>
         <div className="amount-grid">
           {faceAmountKeys.map((key) => (
@@ -465,7 +505,7 @@ export function ExpenseEntryForm({
       <div className="entry-form__block">
         <h4 className="subhead">公益救助（可选）</h4>
         <p className="meta-line">
-          只记录已经实际到账的金额，单独展示，不用于推算费用或支付。没有到账记录时保持「未记录」。
+          只记录已经到账的金额，与费用、支付分开统计。
         </p>
         <div className="aid-row">
           <div className="amount-input">
@@ -520,7 +560,7 @@ export function ExpenseEntryForm({
             className="input"
             maxLength={200}
             value={draft.aid.note}
-            placeholder="例如：公益项目名称、到账月份；不要填写证件号"
+            placeholder="例如：公益项目名称、到账月份"
             onChange={(event) =>
               setDraft({ ...draft, aid: { ...draft.aid, note: event.target.value } })
             }
@@ -535,7 +575,7 @@ export function ExpenseEntryForm({
           maxLength={500}
           rows={3}
           value={draft.note}
-          placeholder="例如：同一次住院的三份文件、退费待核对。不要填写姓名、证件号或联系方式。"
+          placeholder="例如：同一次住院的三份文件、退费待核对"
           onChange={(event) => setDraft({ ...draft, note: event.target.value })}
         />
       </label>
@@ -563,9 +603,6 @@ export function ExpenseEntryForm({
           取消
         </button>
       </div>
-      <p className="meta-line">
-        修改已计入的账目后，需要重新勾选「我已核对这些金额和日期」才会再次进入统计。
-      </p>
     </section>
   );
 }

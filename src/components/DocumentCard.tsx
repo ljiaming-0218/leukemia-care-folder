@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useDocuments } from "../features/documents/DocumentsContext";
+import { useLedger } from "../features/ledger/LedgerContext";
+import { usePrepareState } from "../features/prepare/PrepareStateContext";
 import {
   archiveTypes,
   fenToYuanInput,
@@ -43,12 +46,20 @@ function stateTag(doc: LocalDocument): { label: string; tone: string } {
 export function DocumentCard({ doc, index, flags, onPreview }: DocumentCardProps) {
   const { updateArchiveType, updateField, setConfirmed, dismissFlag, removeDoc, startRecognition, isRunning } =
     useDocuments();
+  const { usedDocumentIds } = useLedger();
+  const { linkedDocuments } = usePrepareState();
   const [amountText, setAmountText] = useState(() => fenToYuanInput(doc.fields.amountFen.value));
   const [amountError, setAmountError] = useState("");
   const [confirmRemove, setConfirmRemove] = useState(false);
   const status = stateTag(doc);
   const window = windowStatus(doc, xiaoludengRule.expenseFrom, xiaoludengRule.expenseTo);
   const canRerun = doc.ocrState !== "不支持";
+  const usedInLedger = usedDocumentIds.has(doc.id);
+  const linkedMaterialLabels = Object.entries(linkedDocuments)
+    .filter(([, ids]) => ids.includes(doc.id))
+    .map(([itemId]) => xiaoludengRule.materialItems.find((item) => item.id === itemId)?.label)
+    .filter((label): label is string => Boolean(label));
+  const removalBlocked = usedInLedger || linkedMaterialLabels.length > 0;
 
   useEffect(() => {
     setAmountText(fenToYuanInput(doc.fields.amountFen.value));
@@ -254,7 +265,22 @@ export function DocumentCard({ doc, index, flags, onPreview }: DocumentCardProps
             重新识别
           </button>
         )}
-        {confirmRemove ? (
+        {removalBlocked ? (
+          <span className="notice notice--warn" role="status">
+            {usedInLedger && (
+              <>
+                已在<Link to="/ledger">家庭账目</Link>中。{" "}
+              </>
+            )}
+            {linkedMaterialLabels.length > 0 && (
+              <>
+                已在<Link to="/prepare">提交准备</Link>材料中（
+                {linkedMaterialLabels.join("、")}）。{" "}
+              </>
+            )}
+            需先解除关联。
+          </span>
+        ) : confirmRemove ? (
           <span className="inline-confirm">
             <span>移除后需重新导入原件。</span>
             <button type="button" className="btn btn--danger btn--small" onClick={() => removeDoc(doc.id)}>
@@ -270,9 +296,6 @@ export function DocumentCard({ doc, index, flags, onPreview }: DocumentCardProps
           </button>
         )}
       </div>
-      <p className="doc-card__foot">
-        费用发生日期用于核对专项公告时间，开票日期单独保存；两者不互相代替。修改任一字段后需要重新核对。
-      </p>
     </article>
   );
 }

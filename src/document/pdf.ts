@@ -1,9 +1,27 @@
-import * as pdfjsLib from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
+import type { PDFDocumentLoadingTask, PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
 import { DocumentError } from "./errors";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+type PdfjsModule = typeof import("pdfjs-dist");
+
+let pdfjsPromise: Promise<PdfjsModule> | null = null;
+
+function loadPdfjs(): Promise<PdfjsModule> {
+  if (!pdfjsPromise) {
+    pdfjsPromise = Promise.all([
+      import("pdfjs-dist"),
+      import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+    ])
+      .then(([pdfjs, worker]) => {
+        pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+        return pdfjs;
+      })
+      .catch((error) => {
+        pdfjsPromise = null;
+        throw wrapError(error);
+      });
+  }
+  return pdfjsPromise;
+}
 
 const baseOptions = {
   isEvalSupported: false,
@@ -26,9 +44,12 @@ function wrapError(error: unknown): DocumentError {
 }
 
 async function loadPdf(file: File): Promise<{ document: PDFDocumentProxy; close: () => Promise<void> }> {
-  let task: pdfjsLib.PDFDocumentLoadingTask | undefined;
+  let task: PDFDocumentLoadingTask | undefined;
   try {
-    const data = new Uint8Array(await file.arrayBuffer());
+    const [pdfjsLib, data] = await Promise.all([
+      loadPdfjs(),
+      file.arrayBuffer().then((buffer) => new Uint8Array(buffer)),
+    ]);
     task = pdfjsLib.getDocument({ ...baseOptions, data });
     const document = await task.promise;
     return {
