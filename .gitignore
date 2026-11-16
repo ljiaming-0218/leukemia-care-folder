@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+.qoder-sites/
+.qoder-sites.json
+
+# local test artifacts and duplicate OCR downloads
+.tmp/
+*.traineddata
