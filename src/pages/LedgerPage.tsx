@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { CopyButton } from "@/src/components/CopyButton";
 import { CostStatementCard } from "@/src/components/CostStatementCard";
 import { DocumentPreview } from "@/src/components/DocumentPreview";
@@ -30,6 +30,7 @@ import {
   type LedgerBackup,
 } from "@/src/domain/ledger";
 import { formatFen, safeDownloadName, type LocalDocument } from "@/src/domain/documents";
+import { findGapHints } from "@/src/domain/gapCheck";
 import { useDocuments } from "@/src/features/documents/DocumentsContext";
 import { downloadStamp, localToday, useLedger } from "@/src/features/ledger/LedgerContext";
 import { useWorkspace, type WorkspaceMode } from "@/src/features/workspace/WorkspaceContext";
@@ -110,6 +111,17 @@ export default function LedgerPage() {
   } | null>(null);
   const [importError, setImportError] = useState("");
   const importInputRef = useRef<HTMLInputElement>(null);
+  const location = useLocation();
+  const hashEntryFound = entries.some((entry) => location.hash === `#entry-${entry.id}`);
+
+  useEffect(() => {
+    if (!hashEntryFound) return;
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(location.hash.slice(1));
+      if (target) scrollToElement(target);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [hashEntryFound, location.hash]);
 
   const confirmedDocs = useMemo(
     () =>
@@ -124,6 +136,7 @@ export default function LedgerPage() {
   const summary = useMemo(() => summarizeEntries(entries), [entries]);
   const countedEntries = entries.filter((entry) => entry.confirmed);
   const pendingEntries = entries.filter((entry) => !entry.confirmed);
+  const gapHintCount = useMemo(() => findGapHints(entries).length, [entries]);
   const categoryRows = useMemo(() => summarizeByCategory(entries), [entries]);
   const months = useMemo(
     () => Array.from(new Set(entries.map((entry) => entryMonthKey(entry)))).sort((a, b) => {
@@ -323,6 +336,12 @@ export default function LedgerPage() {
         {confirmedDocs.length} 份，其中 {confirmedDocs.length - unassigned.length} 份已归入账目
         {unconfirmedCount > 0 ? ` · 另有 ${unconfirmedCount} 份原件未核对` : ""}
       </div>
+
+      {gapHintCount > 0 && (
+        <p className="ledger-check-link">
+          <Link to="/check">查漏：已确认账目里有 {gapHintCount} 条可以去问的提醒 →</Link>
+        </p>
+      )}
 
       {(confirmedDocs.length > 0 || entries.length > 0) && (
         <section className="section" aria-labelledby="summary-title">

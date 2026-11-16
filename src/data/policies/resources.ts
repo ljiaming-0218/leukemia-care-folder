@@ -11,6 +11,7 @@ const NHSA_CROSS_PROVINCE = "https://www.nhsa.gov.cn/art/2022/7/26/art_104_8629.
 const NHSA_2025_GUIDE = "https://www.nhsa.gov.cn/art/2025/6/7/art_14_16754.html";
 const NHSA_OUTPATIENT_QA = "https://www.nhsa.gov.cn/art/2025/7/19/art_14_17329.html";
 const NHSA_SERVICE = "https://fuwu.nhsa.gov.cn/";
+const NHSA_DUAL_CHANNEL = "https://www.nhsa.gov.cn/art/2021/5/10/art_37_5023.html";
 const MOF_E_INVOICE =
   "https://www.mof.gov.cn/gkml/caizhengwengao/wg201901/wg201908/201912/t20191230_3452059.htm";
 const CRCF = "https://www.crcf.org.cn/";
@@ -151,6 +152,46 @@ const rawResources = [
       "本地大病保险是自动结算还是需要单独申请？",
       "起付线、分段比例和年度上限是多少？",
       "目录外自费药和基因检测是否纳入合规费用？",
+    ],
+  },
+  {
+    id: "national-dual-channel",
+    region: "全国",
+    category: "参保与结算",
+    title: "谈判药「双通道」：药店买的药也可能按医保结算",
+    summary:
+      "国家医保局、国家卫生健康委 2021 年明确：纳入「双通道」管理的国家医保谈判药品，在定点医疗机构和定点零售药店施行统一的支付政策。也就是说，名单内的药在定点药店买，也可以按同样的医保政策支付。具体哪些药纳入、哪些药店是定点、怎么开处方，以参保地公布的名单和流程为准。",
+    details: [
+      {
+        heading: "外购药先问一句：在不在名单里",
+        paragraphs: [
+          "医院暂时没有、需要到院外药店买的药，家长常按全自费处理。如果它属于国家医保谈判药品，并被参保地纳入「双通道」管理，在定点药店购买也可能按医保结算。先拿药名去问开药医生或医院医保窗口，再决定去哪家药店买。",
+        ],
+      },
+      {
+        heading: "名单和药店按参保地公布",
+        paragraphs: [
+          "「双通道」药品名单、定点零售药店和购药流程由各地医保部门公布，不同省份、不同时间可能不同。本站没有收录各地名单，查不到时显示「待核对」，不按别的地区推断。",
+        ],
+        bullets: [
+          "带上药品通用名、规格和处方，问是否属于「双通道」药品。",
+          "问清要去哪家定点药店，处方怎么开、怎么流转。",
+          "已经自费买过的，问能否按规定补报；保留购药票据和处方。",
+        ],
+      },
+    ],
+    applicability: "参加基本医保、需要使用国家医保谈判药品的患者；药品名单和定点药店按参保地公布。",
+    issuer: "国家医疗保障局、国家卫生健康委员会",
+    sourceUrl: NHSA_DUAL_CHANNEL,
+    sourceNote:
+      "《关于建立完善国家医保谈判药品「双通道」管理机制的指导意见》（医保发〔2021〕28 号）。药品名单以参保地最新公布为准。",
+    publishedAt: "2021-05-10",
+    verifiedAt: "2026-11-17",
+    entryText: "向开药医生、医院医保窗口或参保地医保经办机构询问；也可拨打 12393。",
+    confirmQuestions: [
+      "这个药是不是国家医保谈判药品，参保地有没有纳入「双通道」管理？",
+      "可以在哪几家定点药店买，处方怎么开、怎么流转？",
+      "之前已经全自费买过的，能不能按规定补报，需要哪些票据？",
     ],
   },
   {

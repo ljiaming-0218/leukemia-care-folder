@@ -18,6 +18,7 @@ const ResourcesPage = lazy(() => import("@/src/pages/ResourcesPage"));
 const RoutePage = lazy(() => import("@/src/pages/RoutePage"));
 const ReceiptsPage = lazy(() => import("@/src/pages/ReceiptsPage"));
 const LedgerPage = lazy(() => import("@/src/pages/LedgerPage"));
+const CheckPage = lazy(() => import("@/src/pages/CheckPage"));
 const PreparePage = lazy(() => import("@/src/pages/PreparePage"));
 const StoriesPage = lazy(() => import("@/src/pages/StoriesPage"));
 const FundraisingPage = lazy(() => import("@/src/pages/FundraisingPage"));
@@ -73,6 +74,7 @@ function WorkspaceRoutes() {
         <Route path="/route" element={<RoutePage />} />
         <Route path="/receipts" element={<ReceiptsPage />} />
         <Route path="/ledger" element={<LedgerPage />} />
+        <Route path="/check" element={<CheckPage />} />
         <Route path="/prepare" element={<PreparePage />} />
         <Route path="/stories" element={<StoriesPage />} />
         <Route path="/fundraising" element={<FundraisingPage />} />

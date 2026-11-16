@@ -8,6 +8,7 @@ const navItems = [
   { to: "/resources", label: "医保和救助" },
   { to: "/receipts", label: "票据导入" },
   { to: "/ledger", label: "家庭费用" },
+  { to: "/check", label: "查漏" },
   { to: "/prepare", label: "提交准备" },
   { to: "/fundraising", label: "筹款准备" },
   { to: "/about", label: "说明" },
