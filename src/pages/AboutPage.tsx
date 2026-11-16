@@ -5,7 +5,8 @@ import { useDocuments } from "@/src/features/documents/DocumentsContext";
 import { useLedger } from "@/src/features/ledger/LedgerContext";
 import { usePrepareState } from "@/src/features/prepare/PrepareStateContext";
 import { useWorkspace } from "@/src/features/workspace/WorkspaceContext";
-import { localStoreNote, useLocalStoreStatus } from "@/src/lib/localStore";
+import { localStoreNote, saveValue, useLocalStoreStatus } from "@/src/lib/localStore";
+import { routeStoreKey } from "@/src/domain/route";
 import { usePageTitle } from "@/src/lib/usePageTitle";
 
 const sources = [
@@ -213,7 +214,7 @@ export default function AboutPage() {
         </div>
         <div className="card">
           <p className="card__body">
-            只清空当前工作区（{modeLabel}）的票据原件、家庭账目，以及「提交准备」页的材料核对状态和原件关联；{isDemo ? "真实工作区的资料不受影响，可在顶部横幅返回后继续使用。" : "保存在本机浏览器里的这些资料会一并删除，不会改动演示工作区。"} 已导出的 CSV 或账本备份保存在浏览器下载目录中，不会被删除。
+            只清空当前工作区（{modeLabel}）的票据原件、家庭账目、「我家的路线」进度，以及「提交准备」页的材料核对状态和原件关联；{isDemo ? "真实工作区的资料不受影响，可在顶部横幅返回后继续使用。" : "保存在本机浏览器里的这些资料会一并删除，不会改动演示工作区。"} 已导出的 CSV 或账本备份保存在浏览器下载目录中，不会被删除。
           </p>
           <div className="btn-row">
             <button
@@ -223,6 +224,7 @@ export default function AboutPage() {
                 clearDocuments();
                 clearLedger();
                 reset();
+                if (!isDemo) void saveValue(routeStoreKey, null);
                 setCleared(true);
               }}
             >
@@ -230,7 +232,7 @@ export default function AboutPage() {
             </button>
           </div>
           <p className="copy-feedback" role="status" aria-live="polite">
-            {cleared ? `已清空${modeLabel}中的票据、账目和材料核对状态。` : ""}
+            {cleared ? `已清空${modeLabel}中的票据、账目、路线进度和材料核对状态。` : ""}
           </p>
         </div>
       </section>

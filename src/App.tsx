@@ -14,6 +14,7 @@ import { scrollToElement } from "@/src/lib/scrollToElement";
 const HomePage = lazy(() => import("@/src/pages/HomePage"));
 const LearnPage = lazy(() => import("@/src/pages/LearnPage"));
 const ResourcesPage = lazy(() => import("@/src/pages/ResourcesPage"));
+const RoutePage = lazy(() => import("@/src/pages/RoutePage"));
 const ReceiptsPage = lazy(() => import("@/src/pages/ReceiptsPage"));
 const LedgerPage = lazy(() => import("@/src/pages/LedgerPage"));
 const PreparePage = lazy(() => import("@/src/pages/PreparePage"));
@@ -68,6 +69,7 @@ function WorkspaceRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/learn" element={<LearnPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/route" element={<RoutePage />} />
         <Route path="/receipts" element={<ReceiptsPage />} />
         <Route path="/ledger" element={<LedgerPage />} />
         <Route path="/prepare" element={<PreparePage />} />
