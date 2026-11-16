@@ -5,15 +5,17 @@ import { PageHeader } from "@/src/components/PageHeader";
 import { policyResources } from "@/src/data/policies/resources";
 import { findGapHints, gapHintsText } from "@/src/domain/gapCheck";
 import { useLedger } from "@/src/features/ledger/LedgerContext";
+import { usePlace } from "@/src/features/place/PlaceContext";
 import { useWorkspace } from "@/src/features/workspace/WorkspaceContext";
 import { usePageTitle } from "@/src/lib/usePageTitle";
 
-const resourceTitles = new Map(policyResources.map((resource) => [resource.id, resource.title]));
+const resourcesById = new Map(policyResources.map((resource) => [resource.id, resource]));
 
 export default function CheckPage() {
   usePageTitle("查漏");
   const { entries } = useLedger();
   const { modeLabel } = useWorkspace();
+  const { placeLabel, regions } = usePlace();
   const hints = useMemo(() => findGapHints(entries), [entries]);
   const confirmedCount = entries.filter((entry) => entry.confirmed).length;
   const pendingCount = entries.length - confirmedCount;
@@ -30,6 +32,19 @@ export default function CheckPage() {
         {modeLabel} · 已对照 {confirmedCount} 笔已确认账目 · 发现 {hints.length} 条可以去问的提醒
         {pendingCount > 0 ? ` · 另有 ${pendingCount} 笔待核对账目未参与对照` : ""}
       </div>
+
+      <p className="meta-line">
+        {regions ? (
+          <>
+            参保地：{placeLabel}，下面只列出全国统一制度和这个参保地已收录的原文。{" "}
+            <Link to="/route">改参保地</Link>
+          </>
+        ) : (
+          <>
+            还没选参保地，原文按全部已收录资料列出。<Link to="/route">去选参保地</Link>
+          </>
+        )}
+      </p>
 
       {confirmedCount === 0 ? (
         <section className="section" aria-labelledby="check-empty-title">
@@ -85,13 +100,18 @@ export default function CheckPage() {
                   ))}
                 </ul>
                 <p className="meta-line">
-                  资料卡：
-                  {hint.resourceIds.map((id, index) => (
-                    <span key={id}>
-                      {index > 0 && " · "}
-                      <Link to={`/resources#${id}`}>{resourceTitles.get(id) ?? id}</Link>
-                    </span>
-                  ))}
+                  原文：
+                  {hint.resourceIds
+                    .map((id) => resourcesById.get(id))
+                    .filter((resource) => resource && (!regions || regions.has(resource.region)))
+                    .map((resource, index) => (
+                      <span key={resource!.id}>
+                        {index > 0 && " · "}
+                        <a href={resource!.sourceUrl} target="_blank" rel="noreferrer">
+                          {resource!.title}
+                        </a>
+                      </span>
+                    ))}
                 </p>
               </li>
             ))}

@@ -1,4 +1,5 @@
 import type { ArchiveType } from "./documents";
+import type { PolicyRegion } from "./schemas";
 
 export const routeStoreKey = "real:route";
 
@@ -13,6 +14,23 @@ export type InsuredPlace = {
   city: string;
   county: string;
 };
+
+export const emptyPlace: InsuredPlace = { province: "", city: "", county: "" };
+export const demoPlace: InsuredPlace = { province: "浙江省", city: "丽水市", county: "景宁畲族自治县" };
+
+export function formatPlace(place: InsuredPlace): string {
+  return [place.province, place.city, place.county].filter(Boolean).join(" · ");
+}
+
+export function placePolicyRegions(place: InsuredPlace): Set<PolicyRegion> | null {
+  if (!place.province || !place.city) return null;
+  const regions = new Set<PolicyRegion>(["全国"]);
+  if (place.province === "浙江省") {
+    regions.add("浙江");
+    if (place.county === "景宁畲族自治县") regions.add("景宁");
+  }
+  return regions;
+}
 
 export type RouteLink = { label: string; to: string };
 
@@ -145,14 +163,6 @@ export function buildRoute(place: InsuredPlace, treated: TreatedPlace): RouteSte
   );
 
   return steps;
-}
-
-export function resourceLink(place: InsuredPlace, resourceId: string): string {
-  const params = new URLSearchParams();
-  if (place.province) params.set("province", place.province);
-  if (place.city) params.set("city", place.city);
-  if (place.county) params.set("county", place.county);
-  return `/resources?${params.toString()}#${resourceId}`;
 }
 
 export function routeProgress(

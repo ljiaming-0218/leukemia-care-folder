@@ -95,7 +95,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     needs: ["异地治疗期间的住宿与护理", "感染期间的整夜照护"],
     supports: ["「福州小家」提供免费住宿、厨房和生活物资", "志愿者陪伴与资源链接"],
     tools: [
-      { label: "查跨省异地就医", to: "/resources?region=全国&category=参保与结算" },
+      { label: "看异地就医备案这一步", to: "/route#step-cross-province" },
       { label: "整理票据", to: "/receipts" },
       { label: "看家庭费用", to: "/ledger" },
     ],
@@ -151,7 +151,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     needs: ["治疗期间的监护与陪诊", "医疗、住宿和吃饭的支出"],
     supports: ["「福州小家」提供免费住宿和生活物资", "志愿者担任临时监护人，陪同化疗与走疗"],
     tools: [
-      { label: "查医疗救助", to: "/resources?region=全国&category=医疗救助" },
+      { label: "看医疗救助这一步", to: "/route#step-medical-assistance" },
       { label: "小鹿灯材料准备", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
       { label: "整理票据", to: "/receipts" },
     ],
@@ -212,7 +212,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     needs: ["持续治疗费用", "治疗期间的照护与陪伴"],
     supports: ["中央专项彩票公益金大病儿童救助项目 3 万元", "小天使基金人道关怀金 5000 元", "当地红十字会辅导申请"],
     tools: [
-      { label: "查公益救助入口", to: "/resources?region=全国&category=公益项目" },
+      { label: "看公益项目这一步", to: "/route#step-charity" },
       { label: "记一笔救助到账", to: "/ledger" },
       { label: "小鹿灯材料准备", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
     ],
@@ -273,7 +273,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     needs: ["至少两年的治疗费用", "感染期间的自费药", "在广州的住处和陪护"],
     supports: ["医院对低危组的评估", "家人分工：妈妈陪护、外婆做饭、爷爷奶奶照看两个姐姐"],
     tools: [
-      { label: "查跨省异地就医", to: "/resources?region=全国&category=参保与结算" },
+      { label: "看异地就医备案这一步", to: "/route#step-cross-province" },
       { label: "整理票据", to: "/receipts" },
       { label: "看家庭费用", to: "/ledger" },
     ],
@@ -329,7 +329,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     needs: ["移植后的长期复查", "每年持续的治疗费用", "姐姐的学费和家里老人的照护"],
     supports: ["造血干细胞移植", "小天使基金「白血病救助一帮一」探访和「英雄能量包」"],
     tools: [
-      { label: "查公益救助入口", to: "/resources?region=全国&category=公益项目" },
+      { label: "看公益项目这一步", to: "/route#step-charity" },
       { label: "整理票据", to: "/receipts" },
       { label: "小鹿灯材料准备", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
     ],
@@ -390,7 +390,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     needs: ["治疗费用", "父母同时陪护导致的收入中断"],
     supports: ["医院青少年血液病救助基金 3 万至 5 万元", "母亲作为供者的单倍体移植"],
     tools: [
-      { label: "查医疗救助", to: "/resources?region=全国&category=医疗救助" },
+      { label: "看医疗救助这一步", to: "/route#step-medical-assistance" },
       { label: "小鹿灯材料准备", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
       { label: "整理票据", to: "/receipts" },
     ],
@@ -451,7 +451,7 @@ export const stories: Story[] = z.array(storySchema).parse([
     needs: ["移植后的长期走疗", "异地房租和生活费", "治疗期间的学习与社交"],
     supports: ["骨髓移植", "「爱心苗圃」「新阳光病房学校」免费课堂", "病友之间的互助和送外卖的工作机会"],
     tools: [
-      { label: "查跨省异地就医", to: "/resources?region=全国&category=参保与结算" },
+      { label: "看异地就医备案这一步", to: "/route#step-cross-province" },
       { label: "看家庭费用", to: "/ledger" },
       { label: "整理票据", to: "/receipts" },
     ],

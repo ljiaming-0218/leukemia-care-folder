@@ -286,14 +286,14 @@ function fallbackReply(results: { entry: AssistantEntry; score: number }[]): Ass
     kind: "fallback",
     paragraphs: [
       "我在站内已核对的资料里没有找到能直接回答这个问题的内容。",
-      "可以换一个更短的说法，或先查科普、术语表、医保资料和小鹿灯材料提醒。涉及孩子病情、检查结果和用药的问题，请直接问主治医生。",
+      "可以换一个更短的说法，或先查科普、术语表、我家的路线和小鹿灯材料提醒。涉及孩子病情、检查结果和用药的问题，请直接问主治医生。",
     ],
     sources: [],
     suggestions: suggestions.length > 0 ? suggestions : assistantSuggestedQuestions.slice(0, 3),
     actions: [
       { label: "去白血病科普", to: "/learn" },
       { label: "查术语表", to: "/learn#glossary" },
-      { label: "去医保和救助", to: "/resources" },
+      { label: "排我家的路线", to: "/route" },
     ],
   };
 }

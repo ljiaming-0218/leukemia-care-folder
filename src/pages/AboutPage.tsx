@@ -3,6 +3,7 @@ import { aidRules } from "@/src/data/policies/aidRules";
 import { PageHeader } from "@/src/components/PageHeader";
 import { useDocuments } from "@/src/features/documents/DocumentsContext";
 import { useLedger } from "@/src/features/ledger/LedgerContext";
+import { usePlace } from "@/src/features/place/PlaceContext";
 import { usePrepareState } from "@/src/features/prepare/PrepareStateContext";
 import { useWorkspace } from "@/src/features/workspace/WorkspaceContext";
 import { localStoreNote, saveValue, useLocalStoreStatus } from "@/src/lib/localStore";
@@ -104,6 +105,7 @@ export default function AboutPage() {
   const { resetAll } = usePrepareState();
   const { clearAll: clearDocuments } = useDocuments();
   const { clearLedger } = useLedger();
+  const { clearPlace } = usePlace();
   const [cleared, setCleared] = useState(false);
 
   return (
@@ -144,7 +146,7 @@ export default function AboutPage() {
           </div>
         ))}
         <p className="meta-line" style={{ marginTop: 10 }}>
-          目前只有上面这些规则做成了可对照的结构化清单，其他救助项目在「医保和救助」页展示原文和官方入口。已发布的规则内容、来源日期和核对日期随版本保留；正式文件更新后，通过发布新的规则版本修订。
+          目前只有上面这些规则做成了可对照的结构化清单，其他救助项目在「我家的路线」和「查漏」页列出原文和官方入口。已发布的规则内容、来源日期和核对日期随版本保留；正式文件更新后，通过发布新的规则版本修订。
         </p>
       </section>
 
@@ -153,7 +155,7 @@ export default function AboutPage() {
           <h2 className="section__title" id="sources-title">
             公开资料来源
           </h2>
-          <p className="section__note">科普、医保资料和同路人页面分别标注来源；链接在新标签页打开官方原文</p>
+          <p className="section__note">科普、路线、查漏和同路人页面分别标注来源；链接在新标签页打开官方原文</p>
         </div>
         <div className="card">
           <ul className="plain-list">
@@ -219,7 +221,7 @@ export default function AboutPage() {
         </div>
         <div className="card">
           <p className="card__body">
-            只清空当前工作区（{modeLabel}）的票据原件、家庭账目、「我家的路线」进度，以及「提交准备」页的材料核对状态和原件关联；{isDemo ? "真实工作区的资料不受影响，可在顶部横幅返回后继续使用。" : "保存在本机浏览器里的这些资料会一并删除，不会改动演示工作区。"} 已导出的 CSV 或账本备份保存在浏览器下载目录中，不会被删除。
+            只清空当前工作区（{modeLabel}）的票据原件、家庭账目、「我家的路线」里的参保地、就医地和进度，以及「提交准备」页的材料核对状态和原件关联；{isDemo ? "真实工作区的资料不受影响，可在顶部横幅返回后继续使用。" : "保存在本机浏览器里的这些资料会一并删除，不会改动演示工作区。"} 已导出的 CSV 或账本备份保存在浏览器下载目录中，不会被删除。
           </p>
           <div className="btn-row">
             <button
@@ -229,6 +231,7 @@ export default function AboutPage() {
                 clearDocuments();
                 clearLedger();
                 resetAll();
+                clearPlace();
                 if (!isDemo) void saveValue(routeStoreKey, null);
                 setCleared(true);
               }}
@@ -237,7 +240,7 @@ export default function AboutPage() {
             </button>
           </div>
           <p className="copy-feedback" role="status" aria-live="polite">
-            {cleared ? `已清空${modeLabel}中的票据、账目、路线进度和材料核对状态。` : ""}
+            {cleared ? `已清空${modeLabel}中的票据、账目、参保地、路线进度和材料核对状态。` : ""}
           </p>
         </div>
       </section>

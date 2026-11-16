@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { policyResources } from "@/src/data/policies/resources";
-import { buildRoute, resourceLink, routeProgress } from "./route";
+import { buildRoute, placePolicyRegions, routeProgress } from "./route";
 
 const henan = { province: "河南省", city: "郑州市", county: "" };
 const jingning = { province: "浙江省", city: "丽水市", county: "景宁畲族自治县" };
@@ -49,10 +49,11 @@ describe("routeProgress", () => {
   });
 });
 
-describe("resourceLink", () => {
-  it("带上参保地并定位到资料卡", () => {
-    expect(resourceLink(jingning, "cross-province-settlement")).toBe(
-      "/resources?province=%E6%B5%99%E6%B1%9F%E7%9C%81&city=%E4%B8%BD%E6%B0%B4%E5%B8%82&county=%E6%99%AF%E5%AE%81%E7%95%B2%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF#cross-province-settlement",
-    );
+describe("placePolicyRegions", () => {
+  it("选到城市才有匹配范围，景宁才包含景宁资料", () => {
+    expect(placePolicyRegions({ province: "浙江省", city: "", county: "" })).toBeNull();
+    expect([...(placePolicyRegions(henan) ?? [])]).toEqual(["全国"]);
+    expect([...(placePolicyRegions({ ...jingning, county: "" }) ?? [])]).toEqual(["全国", "浙江"]);
+    expect([...(placePolicyRegions(jingning) ?? [])]).toEqual(["全国", "浙江", "景宁"]);
   });
 });

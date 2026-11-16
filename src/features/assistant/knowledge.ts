@@ -487,7 +487,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
       },
     ],
     sources: [SOURCE.nhsaTriple],
-    actions: [{ label: "看医保资料卡", to: "/resources#national-triple-security" }],
+    actions: [{ label: "排我家的路线", to: "/route#step-settlement" }],
   },
   {
     id: "insurance-enrollment",
@@ -503,7 +503,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
     answer: [
       "儿童通常随家庭参加城乡居民基本医疗保险，按参保地规定缴费和享受待遇；具体参保时间、缴费标准和办理渠道由当地确定。",
       "参保地一般按户籍地或常住地确定。孩子跨省就医前，先确认参保地和备案要求，不要把就医医院所在地当成待遇计算地。",
-      "医保资料页已收录全国统一制度，并提供 31 个省级地区、地市和区县的参保地目录。先选到具体参保地再显示匹配资料；除浙江、景宁外，地方起付线、比例和认定材料尚未逐条核对，页面显示「待核对」，请通过国家医保服务平台、12393 或参保地医保部门确认。",
+      "「我家的路线」页可以从 31 个省级地区、地市和区县里选到参保地，按顺序列出医保结算、救助和公益项目各要办什么。本站只收录全国统一制度和浙江、景宁的部分资料；地方起付线、比例和认定材料，请通过国家医保服务平台、12393 或参保地医保部门确认。",
     ],
     sections: [
       {
@@ -516,7 +516,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
       },
     ],
     sources: [SOURCE.nhsaTriple],
-    actions: [{ label: "看医保资料页", to: "/resources" }],
+    actions: [{ label: "排我家的路线", to: "/route" }],
   },
   {
     id: "zhejiang-outpatient",
@@ -538,7 +538,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
       },
     ],
     sources: [SOURCE.zjOutpatient, SOURCE.nhsaQa2025],
-    actions: [{ label: "看浙江资料卡", to: "/resources#zhejiang-outpatient-special" }],
+    actions: [{ label: "看门诊慢特病这一步", to: "/route#step-outpatient-chronic" }],
   },
   {
     id: "cross-province",
@@ -574,7 +574,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
       },
     ],
     sources: [SOURCE.nhsaCross, SOURCE.nhsaGuide2025, SOURCE.nhsaQa2025],
-    actions: [{ label: "看跨省资料卡", to: "/resources#cross-province-settlement" }],
+    actions: [{ label: "看异地就医备案这一步", to: "/route#step-cross-province" }],
   },
   {
     id: "xiaoludeng",
@@ -611,8 +611,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
     ],
     sources: [SOURCE.jingning, SOURCE.alibaba],
     actions: [
-      { label: "看小鹿灯资料卡", to: "/resources#jingning-xiaoludeng-phase5" },
-      { label: "去提交准备", to: "/prepare" },
+      { label: "看小鹿灯规则和材料", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
     ],
   },
   {
@@ -1005,7 +1004,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
     sources: [SOURCE.nhsaTriple, SOURCE.jingning],
     actions: [
       { label: "去家庭费用", to: "/ledger#summary-title" },
-      { label: "看小鹿灯资料卡", to: "/resources#jingning-xiaoludeng-phase5" },
+      { label: "看小鹿灯规则和材料", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
     ],
   },
   {
@@ -1042,8 +1041,8 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
     ],
     sources: [SOURCE.jingning, SOURCE.alibaba],
     actions: [
-      { label: "看医保和救助资料", to: "/resources" },
-      { label: "看小鹿灯资料卡", to: "/resources#jingning-xiaoludeng-phase5" },
+      { label: "排我家的路线", to: "/route" },
+      { label: "看小鹿灯规则和材料", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
     ],
   },
   {
@@ -1091,7 +1090,7 @@ export const assistantEntries: AssistantEntry[] = z.array(entrySchema).parse([
     actions: [
       { label: "看同路人故事", to: "/stories" },
       { label: "打开众筹准备助手", to: "/fundraising#crowdfunding-assistant" },
-      { label: "看小鹿灯资料卡", to: "/resources#jingning-xiaoludeng-phase5" },
+      { label: "看小鹿灯规则和材料", to: "/prepare?rule=jingning-xiaoludeng-phase5-2026" },
     ],
   },
   {

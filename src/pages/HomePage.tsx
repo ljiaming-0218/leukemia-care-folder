@@ -49,7 +49,6 @@ const steps = [
 ];
 
 const moreLinks = [
-  { to: "/resources", label: "医保和救助资料库" },
   { to: "/ledger", label: "家庭费用账本" },
   { to: "/fundraising", label: "筹款准备" },
   { to: "/about", label: "资料来源与隐私说明" },

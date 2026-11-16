@@ -5,7 +5,6 @@ const navItems = [
   { to: "/learn", label: "看懂病" },
   { to: "/stories", label: "同路人" },
   { to: "/route", label: "我家的路线" },
-  { to: "/resources", label: "医保和救助" },
   { to: "/receipts", label: "票据导入" },
   { to: "/ledger", label: "家庭费用" },
   { to: "/check", label: "查漏" },

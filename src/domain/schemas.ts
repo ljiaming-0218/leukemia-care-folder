@@ -9,7 +9,7 @@ export type KnowledgeTopic = z.infer<typeof knowledgeTopicSchema>;
 
 const linkTargetSchema = z
   .string()
-  .regex(/^\/(learn|resources|receipts|ledger|prepare|about)/, "站内链接必须以 / 开头");
+  .regex(/^\/(learn|route|receipts|ledger|check|prepare|about)(?:[/?#]|$)/, "站内链接须指向本站已有页面");
 
 export const knowledgeDetailSchema = z.object({
   heading: z.string().min(1),

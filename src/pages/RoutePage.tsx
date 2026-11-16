@@ -6,56 +6,42 @@ import { regionProvinces } from "@/src/data/regions";
 import type { ArchiveType } from "@/src/domain/documents";
 import {
   buildRoute,
-  resourceLink,
   routeProgress,
   routeStepStates,
   routeStoreKey,
   treatedPlaces,
   type InsuredPlace,
   type RouteStepState,
-  type TreatedPlace,
 } from "@/src/domain/route";
 import { useDocuments } from "@/src/features/documents/DocumentsContext";
+import { usePlace } from "@/src/features/place/PlaceContext";
 import { useWorkspace } from "@/src/features/workspace/WorkspaceContext";
 import { loadValue, saveValue } from "@/src/lib/localStore";
 import { usePageTitle } from "@/src/lib/usePageTitle";
 
 const municipalityNames = new Set(["北京市", "天津市", "上海市", "重庆市"]);
 
-type StoredRoute = {
-  place: InsuredPlace;
-  treated: TreatedPlace;
-  states: Record<string, RouteStepState>;
-};
+type StepStates = Record<string, RouteStepState>;
 
-const emptyRoute: StoredRoute = {
-  place: { province: "", city: "", county: "" },
-  treated: "本省医院",
-  states: {},
-};
+const demoStates: StepStates = { "insured-status": "已办", "outpatient-chronic": "已办" };
 
-const demoRoute: StoredRoute = {
-  place: { province: "浙江省", city: "丽水市", county: "景宁畲族自治县" },
-  treated: "本省医院",
-  states: { "insured-status": "已办", "outpatient-chronic": "已办" },
-};
-
-const resourceTitles = new Map(policyResources.map((resource) => [resource.id, resource.title]));
+const resourcesById = new Map(policyResources.map((resource) => [resource.id, resource]));
 
 export default function RoutePage() {
   usePageTitle("我家的路线");
 
   const { isDemo, modeLabel } = useWorkspace();
   const { docs } = useDocuments();
-  const [route, setRoute] = useState<StoredRoute>(isDemo ? demoRoute : emptyRoute);
+  const { place, treated, placeLabel, setPlace: savePlace, setTreated } = usePlace();
+  const [states, setStates] = useState<StepStates>(isDemo ? demoStates : {});
   const [hydrated, setHydrated] = useState(isDemo);
 
   useEffect(() => {
     if (isDemo) return;
     let cancelled = false;
-    void loadValue<StoredRoute>(routeStoreKey).then((stored) => {
+    void loadValue<{ states?: StepStates }>(routeStoreKey).then((stored) => {
       if (cancelled) return;
-      if (stored?.place) setRoute({ ...emptyRoute, ...stored });
+      if (stored?.states) setStates(stored.states);
       setHydrated(true);
     });
     return () => {
@@ -65,10 +51,9 @@ export default function RoutePage() {
 
   useEffect(() => {
     if (isDemo || !hydrated) return;
-    void saveValue(routeStoreKey, route);
-  }, [isDemo, hydrated, route]);
+    void saveValue(routeStoreKey, { states });
+  }, [isDemo, hydrated, states]);
 
-  const { place, treated, states } = route;
   const province = regionProvinces.find((item) => item.name === place.province) ?? null;
   const city = province?.cities.find((item) => item.name === place.city) ?? null;
   const cityLabel = province && municipalityNames.has(province.name) ? "区县" : "城市";
@@ -84,22 +69,20 @@ export default function RoutePage() {
   }, [docs]);
 
   function setPlace(level: keyof InsuredPlace, value: string) {
-    setRoute((previous) => {
-      const next = { ...previous.place, [level]: value };
-      if (level === "province") {
-        next.city = "";
-        next.county = "";
-      }
-      if (level === "city") next.county = "";
-      return { ...previous, place: next };
-    });
+    const next = { ...place, [level]: value };
+    if (level === "province") {
+      next.city = "";
+      next.county = "";
+    }
+    if (level === "city") next.county = "";
+    savePlace(next);
   }
 
   function setStepState(id: string, state: RouteStepState) {
-    setRoute((previous) => ({ ...previous, states: { ...previous.states, [id]: state } }));
+    setStates((previous) => ({ ...previous, [id]: state }));
   }
 
-  const placeText = [place.province, place.city, place.county].filter(Boolean).join(" · ");
+  const placeText = placeLabel;
 
   return (
     <>
@@ -184,20 +167,27 @@ export default function RoutePage() {
                 type="button"
                 className="chip"
                 aria-pressed={treated === item}
-                onClick={() => setRoute((previous) => ({ ...previous, treated: item }))}
+                onClick={() => setTreated(item)}
               >
                 {item}
               </button>
             ))}
           </div>
-          <span className="field__hint">
+          <span
+            className="field__hint"
+            id={
+              placeReady && steps.some((step) => step.id === "cross-province")
+                ? undefined
+                : "step-cross-province"
+            }
+          >
             医院在参保省以外时，会多出一步「异地就医备案」。
           </span>
         </div>
         <p className="field__hint">
           {isDemo
             ? `当前为${modeLabel}，示例参保地为景宁，进度不保存。`
-            : "参保地、就医地和每步进度保存在这台设备的浏览器里，不会上传。"}
+            : "参保地、就医地和每步进度保存在这台设备的浏览器里，不会上传。查漏和提交准备页会按这里的参保地显示相关资料。"}
         </p>
       </section>
 
@@ -246,6 +236,7 @@ export default function RoutePage() {
               return (
                 <li
                   key={step.id}
+                  id={`step-${step.id}`}
                   className={`route-step route-step--${state === "已办" ? "done" : state === "不适用" ? "skip" : "todo"}`}
                 >
                   <div className="route-step__head">
@@ -262,11 +253,11 @@ export default function RoutePage() {
                   <p className="card__body">{step.why}</p>
                   {step.conditional ? <p className="meta-line">{step.conditional}</p> : null}
 
-                  <p
-                    className={`route-step__local route-step__local--${step.localNote.kind}`}
-                  >
-                    {step.localNote.text}
-                  </p>
+                  {step.localNote.kind === "recorded" ? (
+                    <p className="route-step__local route-step__local--recorded">
+                      {step.localNote.text}
+                    </p>
+                  ) : null}
 
                   <p className="subhead">要准备</p>
                   <ul className="plain-list plain-list--tight">
@@ -284,13 +275,24 @@ export default function RoutePage() {
                     </p>
                   ) : null}
 
-                  <p className="subhead">资料卡</p>
+                  <p className="subhead">原文</p>
                   <ul className="plain-list plain-list--tight">
-                    {step.resourceIds.map((id) => (
-                      <li key={id}>
-                        <Link to={resourceLink(place, id)}>{resourceTitles.get(id) ?? id}</Link>
-                      </li>
-                    ))}
+                    {step.resourceIds.map((id) => {
+                      const resource = resourcesById.get(id);
+                      if (!resource) return null;
+                      return (
+                        <li key={id}>
+                          <a href={resource.sourceUrl} target="_blank" rel="noreferrer">
+                            {resource.title}
+                          </a>
+                          <span className="meta-line">
+                            {" "}
+                            · {resource.issuer}
+                            {resource.publishedAt ? ` · ${resource.publishedAt} 发布` : ""}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
 
                   <div className="material-item__controls">
@@ -321,7 +323,7 @@ export default function RoutePage() {
           </ol>
 
           <p className="notice">
-            顺序按常见办理先后排列，各地可能不同；同一时期可以并行准备。标「待核对」的地方，本站没有收录该地细则，不代表没有政策。
+            顺序按常见办理先后排列，各地可能不同；同一时期可以并行准备。本站只收录全国统一制度和浙江、景宁的部分资料；起付线、比例和材料清单以参保地医保部门、12393 或医院医保窗口的答复为准。
           </p>
         </>
       )}

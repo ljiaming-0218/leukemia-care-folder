@@ -196,8 +196,8 @@ const rawCards = [
     ],
     action: {
       kind: "link",
-      label: "打开「跨省异地就医」资料卡",
-      to: "/resources",
+      label: "看路线里的「异地就医备案」",
+      to: "/route#step-cross-province",
     },
     applicability:
       "适用于参保地与就医地不同的家庭。备案类型、有效期与可结算范围以参保地经办机构和医院答复为准。",
@@ -335,8 +335,8 @@ const rawCards = [
     ],
     action: {
       kind: "link",
-      label: "跳到医保和救助资料页",
-      to: "/resources",
+      label: "按参保地排我家的路线",
+      to: "/route",
     },
     applicability: "适用于所有患儿家庭。具体条件、材料和比例以各地经办部门公布的规则为准。",
     sourceName: "国家医保局三重保障制度说明",

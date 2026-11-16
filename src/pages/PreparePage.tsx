@@ -3,11 +3,13 @@ import { Link, useSearchParams } from "react-router-dom";
 import { DocumentPreview } from "@/src/components/DocumentPreview";
 import { PageHeader } from "@/src/components/PageHeader";
 import { aidRules, unstructuredCharityResources } from "@/src/data/policies/aidRules";
+import { policyResources } from "@/src/data/policies/resources";
 import { groupEntriesByWindow, type WindowTag } from "@/src/domain/aidWindow";
 import { formatFen, type LocalDocument } from "@/src/domain/documents";
 import { materialStateValues, type MaterialState } from "@/src/domain/schemas";
 import { useDocuments } from "@/src/features/documents/DocumentsContext";
 import { useLedger } from "@/src/features/ledger/LedgerContext";
+import { usePlace } from "@/src/features/place/PlaceContext";
 import { useAidRule } from "@/src/features/prepare/AidRuleContext";
 import { usePrepareState } from "@/src/features/prepare/PrepareStateContext";
 import { usePageTitle } from "@/src/lib/usePageTitle";
@@ -39,6 +41,9 @@ export default function PreparePage() {
     usePrepareState();
   const { docs } = useDocuments();
   const { entries } = useLedger();
+  const { placeLabel, regions } = usePlace();
+  const ruleResource = policyResources.find((resource) => resource.id === rule.resourceId);
+  const regionDiffers = Boolean(regions && ruleResource && !regions.has(ruleResource.region));
   const [openPicker, setOpenPicker] = useState<string | null>(null);
   const [preview, setPreview] = useState<LocalDocument | null>(null);
   const percent = total === 0 ? 0 : Math.round((checkedCount / total) * 100);
@@ -107,17 +112,29 @@ export default function PreparePage() {
         {unstructuredCharityResources.length > 0 && (
           <div className="notice" style={{ marginTop: 12 }}>
             <p style={{ margin: 0 }}>
-              下面这些项目本站还没有做成逐项清单，请按资料卡里的原文和官方入口准备：
+              下面这些项目本站还没有做成逐项清单，请按原文和官方入口准备：
             </p>
             <ul style={{ margin: "6px 0 0", paddingLeft: "1.2em" }}>
               {unstructuredCharityResources.map((resource) => (
                 <li key={resource.id}>
-                  <Link to={`/resources#${resource.id}`}>{resource.title}</Link>
+                  <a href={resource.sourceUrl} target="_blank" rel="noreferrer">
+                    {resource.title}
+                  </a>
+                  <span className="meta-line"> · {resource.issuer}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
+        <p className="meta-line" style={{ marginTop: 12 }}>
+          {regions ? `你家参保地：${placeLabel}。` : "还没选参保地。"}
+          <Link to="/route">{regions ? "改参保地" : "去选参保地"}</Link>
+        </p>
+        {regionDiffers ? (
+          <p className="notice">
+            这个项目的适用地区是「{rule.region}」，和你选的参保地不同。公告对象按公告写的居住、户籍等条件界定，和参保地不是一回事，能否申请请以项目方答复为准。
+          </p>
+        ) : null}
       </section>
 
       <article className="card" style={{ marginTop: "calc(22px * var(--site-space))" }}>

@@ -6,6 +6,7 @@ import { AssistantLauncher, AssistantPanel } from "@/src/components/AssistantPan
 import { AssistantProvider } from "@/src/features/assistant/AssistantContext";
 import { DocumentsProvider } from "@/src/features/documents/DocumentsContext";
 import { LedgerProvider } from "@/src/features/ledger/LedgerContext";
+import { PlaceProvider } from "@/src/features/place/PlaceContext";
 import { AidRuleProvider } from "@/src/features/prepare/AidRuleContext";
 import { PrepareStateProvider } from "@/src/features/prepare/PrepareStateContext";
 import { DemoWorkspaceLoader } from "@/src/features/workspace/DemoWorkspaceLoader";
@@ -14,7 +15,6 @@ import { scrollToElement } from "@/src/lib/scrollToElement";
 
 const HomePage = lazy(() => import("@/src/pages/HomePage"));
 const LearnPage = lazy(() => import("@/src/pages/LearnPage"));
-const ResourcesPage = lazy(() => import("@/src/pages/ResourcesPage"));
 const RoutePage = lazy(() => import("@/src/pages/RoutePage"));
 const ReceiptsPage = lazy(() => import("@/src/pages/ReceiptsPage"));
 const LedgerPage = lazy(() => import("@/src/pages/LedgerPage"));
@@ -70,7 +70,7 @@ function WorkspaceRoutes() {
       <Routes key={mode}>
         <Route path="/" element={<HomePage />} />
         <Route path="/learn" element={<LearnPage />} />
-        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/resources" element={<Navigate to="/route" replace />} />
         <Route path="/route" element={<RoutePage />} />
         <Route path="/receipts" element={<ReceiptsPage />} />
         <Route path="/ledger" element={<LedgerPage />} />
@@ -89,6 +89,7 @@ export default function App() {
   return (
     <AssistantProvider>
       <WorkspaceProvider>
+        <PlaceProvider>
         <AidRuleProvider>
         <DocumentsProvider>
           <LedgerProvider>
@@ -125,6 +126,7 @@ export default function App() {
         </LedgerProvider>
       </DocumentsProvider>
         </AidRuleProvider>
+        </PlaceProvider>
     </WorkspaceProvider>
   </AssistantProvider>
   );

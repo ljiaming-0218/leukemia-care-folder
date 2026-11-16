@@ -201,7 +201,7 @@ export default function FundraisingPage() {
               ：查看慈善事业相关法规和办事信息。
             </li>
             <li>
-              <Link to="/resources#jingning-xiaoludeng-phase5">景宁第五期「小鹿灯」资料卡</Link>
+              <Link to="/prepare?rule=jingning-xiaoludeng-phase5-2026">景宁第五期「小鹿灯」规则和材料</Link>
               ：查看公告明示的费用范围和申报时间。
             </li>
             <li>
