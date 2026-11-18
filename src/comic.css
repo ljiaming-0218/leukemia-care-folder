@@ -1,0 +1,361 @@
+/* ── 动态漫画 ─────────────────────────────────────────────── */
+
+.comic {
+  margin: 0 0 28px;
+}
+
+.comic__bar {
+  position: sticky;
+  top: 64px;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  padding: 8px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--site-surface) 92%, transparent);
+  border: 1px solid var(--site-border);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 6%);
+}
+
+.comic__warning {
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  border-inline-start: 4px solid var(--hue, var(--hue-sun));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--hue, var(--hue-sun)) 14%, var(--site-surface));
+  font-size: 0.95rem;
+}
+
+.comic__panels {
+  display: grid;
+  gap: 26px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 480px;
+  margin-inline: auto;
+}
+
+.panel {
+  margin: 0;
+  padding: 14px;
+  border: 3px solid color-mix(in srgb, var(--hue, var(--hue-sun)) 60%, var(--site-border));
+  border-radius: 24px;
+  background: var(--site-surface);
+  box-shadow: var(--site-shadow);
+  opacity: 0;
+  translate: 0 26px;
+  transition:
+    opacity 0.5s ease,
+    translate 0.5s ease;
+}
+
+.panel.is-visible {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.panel:focus-visible {
+  outline: 3px solid var(--site-accent, #5b8dd9);
+  outline-offset: 3px;
+}
+
+.panel__art {
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.panel__art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.panel__text {
+  margin-top: 12px;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+.panel__caption {
+  margin: 0 0 6px;
+}
+
+.panel__dialogue {
+  margin: 0 0 6px;
+  padding: 8px 14px;
+  border-radius: 14px 14px 14px 4px;
+  background: color-mix(in srgb, var(--hue, var(--hue-sun)) 14%, var(--site-surface));
+}
+
+.panel__speaker {
+  font-weight: 700;
+}
+
+.panel__dive {
+  display: inline-flex;
+  margin-top: 8px;
+}
+
+.panel__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.panel__count {
+  color: var(--site-muted);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 动效：只对画面生效，文字始终静态可读 */
+
+.motion-reveal.is-visible .panel__art svg {
+  animation: comic-reveal 0.7s ease both;
+}
+
+.motion-pan .panel__art svg {
+  animation: comic-pan var(--panel-duration, 1200ms) ease-in-out infinite alternate;
+}
+
+.motion-zoom .panel__art svg {
+  animation: comic-zoom var(--panel-duration, 2600ms) ease-in-out infinite alternate;
+}
+
+.motion-float .panel__art svg {
+  animation: comic-float var(--panel-duration, 3000ms) ease-in-out infinite alternate;
+}
+
+.motion-pulse .panel__art svg {
+  animation: comic-pulse var(--panel-duration, 2200ms) ease-in-out infinite alternate;
+}
+
+@keyframes comic-reveal {
+  from {
+    opacity: 0;
+    scale: 0.94;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes comic-pan {
+  from {
+    translate: -3% 0;
+  }
+  to {
+    translate: 3% 0;
+  }
+}
+
+@keyframes comic-zoom {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.07;
+  }
+}
+
+@keyframes comic-float {
+  from {
+    translate: 0 -4px;
+  }
+  to {
+    translate: 0 5px;
+  }
+}
+
+@keyframes comic-pulse {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.035;
+  }
+}
+
+.comic.is-paused .panel__art svg {
+  animation-play-state: paused;
+}
+
+.comic.is-static .panel {
+  opacity: 1;
+  translate: 0 0;
+  transition: none;
+}
+
+.comic.is-static .panel__art svg {
+  animation: none !important;
+}
+
+html[data-motion="reduce"] .panel {
+  opacity: 1;
+  translate: 0 0;
+  transition: none;
+}
+
+html[data-motion="reduce"] .panel__art svg {
+  animation: none !important;
+}
+
+/* ── 漫画画面调色板（统一画风：暖色、低饱和、圆角、纸质感） ── */
+
+.panel-art {
+  --paper: #fffaf0;
+  --ink: #55475f;
+  background: var(--paper);
+}
+
+.ca-bg { fill: var(--paper); }
+.ca-red { fill: #f4978e; }
+.ca-red-dimple { fill: #e07a6f; }
+.ca-white { fill: #ece5f8; }
+.ca-platelet { fill: #f9d976; }
+.ca-platelet-dot { fill: #e0b25c; }
+.ca-stem { fill: #cde9f7; }
+.ca-stem-nucleus { fill: #a3d2ec; }
+.ca-blast { fill: #d3c3e6; }
+.ca-blast-nucleus { fill: #b49ad4; }
+.ca-germ { fill: #b49ad8; }
+.ca-germ-spine { stroke: #8f77bd; stroke-width: 3; stroke-linecap: round; }
+.ca-skin { fill: #fbe0c4; }
+.ca-hair { fill: #8a6a52; }
+.ca-kid-shirt { fill: #b5e394; }
+.ca-adult-shirt { fill: #a5d3ef; }
+.ca-coat { fill: #fffdf7; stroke: #ead9c8; stroke-width: 2; }
+.ca-coat-line { fill: #f0e6d4; }
+.ca-hat { fill: #c3b8ec; }
+.ca-cross { fill: #f4978e; }
+.ca-sparkle { fill: #f9d976; }
+.ca-heart { fill: #f7a8b8; }
+.ca-eye { fill: var(--ink); }
+.ca-eye-shine { fill: #ffffff; opacity: 0.9; }
+.ca-blush { fill: #f7a8b8; opacity: 0.5; }
+.ca-line-stroke { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.ca-vessel { fill: #f6b3a4; }
+.ca-vessel-inner { fill: #fbd8cd; }
+.ca-oxygen { fill: #a5d3ef; }
+.ca-oxygen-text { font-size: 15px; font-weight: 700; fill: #3c6a8a; }
+.ca-shield { fill: #a5d3ef; stroke: #84b3d4; stroke-width: 3; stroke-linejoin: round; }
+.ca-shield-line { stroke: #84b3d4; stroke-width: 3; }
+.ca-crack { fill: none; stroke: #d9a184; stroke-width: 4; stroke-linecap: round; }
+.ca-patch { fill: #fbeec2; stroke: #e8c987; stroke-width: 3; }
+.ca-box { fill: #ead6b8; stroke: #d9bc98; stroke-width: 3; }
+.ca-lens { fill: #eef6fb; stroke: #a5c4d8; stroke-width: 5; }
+.ca-lens-handle { stroke: #a5c4d8; stroke-width: 8; stroke-linecap: round; }
+.ca-lens-gleam { fill: #ffffff; opacity: 0.7; }
+.ca-clipboard { fill: #fffdf7; stroke: #ead9c8; stroke-width: 3; }
+.ca-clip-line { stroke: #d8cbbc; stroke-width: 4; stroke-linecap: round; }
+.ca-tube { fill: #fdf6ea; stroke: #e0d3c2; stroke-width: 3; }
+.ca-tube-fill { fill: #f4978e; }
+.ca-tube-cap { fill: #b5e394; }
+.ca-zzz { font-size: 22px; font-weight: 700; fill: #b3bfd0; }
+.ca-chair { fill: #ead6b8; }
+.ca-bruise { fill: #d3b8dd; opacity: 0.75; }
+.ca-bed { fill: #f7ead6; }
+.ca-pillow { fill: #fffdf7; }
+.ca-coolpad { fill: #bfe3f0; }
+.ca-hug-arm { fill: none; stroke: #fbe0c4; stroke-width: 12; stroke-linecap: round; }
+.ca-ball { fill: #f9d976; }
+.ca-ball-line { fill: none; stroke: #e0b25c; stroke-width: 3; }
+.ca-signboard { fill: #c3b8ec; }
+.ca-signboard-text { font-size: 21px; font-weight: 700; fill: #ffffff; }
+.ca-desk { fill: #ead6b8; }
+.ca-folder { fill: #f9d976; stroke: #e8c987; stroke-width: 3; }
+.ca-footprint { fill: #e3d2bd; }
+.ca-bone { fill: #fffdf7; stroke: #ead9c8; stroke-width: 4; }
+.ca-bone-dot { fill: #f0e6d4; }
+.ca-probe { fill: none; stroke: #b3c2d0; stroke-width: 7; stroke-linecap: round; }
+.ca-probe-tip { fill: #94a8ba; }
+.ca-sample-box { fill: #f0f7fb; stroke: #c5d9e6; stroke-width: 3; }
+.ca-moon { fill: #fbeec2; }
+.ca-bubble { fill: #e7f2fa; stroke: #b9d8ea; stroke-width: 2; }
+.ca-gap { fill: none; stroke: #e3d2bd; stroke-width: 5; stroke-dasharray: 8 8; stroke-linecap: round; }
+.ca-body-outline { fill: #fff4e4; stroke: #f0cdb0; stroke-width: 4; }
+.ca-brain { fill: #f9c9d4; }
+.ca-spine { stroke: #eab3bd; stroke-width: 10; stroke-linecap: round; }
+.ca-sample-dot { fill: #f6b3a4; }
+.ca-med-pack { fill: #fffdf7; stroke: #ead9c8; stroke-width: 3; }
+.ca-med-cross { stroke: #f4978e; stroke-width: 4; stroke-linecap: round; }
+.ca-belt-path { fill: none; stroke: #e8d5bb; stroke-width: 6; stroke-linecap: round; }
+.ca-lab { fill: #e9f5e4; stroke: #bdd8b2; stroke-width: 3; }
+.ca-lab-text { font-size: 17px; font-weight: 700; fill: #5a7a4f; }
+.ca-hand-kid { fill: #fbe0c4; stroke: #f0c9a4; stroke-width: 3; }
+.ca-hand-adult { fill: #f6d0aa; stroke: #e8b98d; stroke-width: 3; }
+.ca-report { fill: #fffef2; }
+.ca-hand-line { fill: none; stroke: #c79a72; stroke-width: 6; stroke-linecap: round; }
+.ca-factory { fill: #fdf3e3; stroke: #f0dcbc; stroke-width: 3; }
+.ca-factory-roof { fill: #f6b3a4; }
+.ca-factory-chimney { fill: #ead6b8; }
+.ca-door { fill: #ead6b8; }
+.ca-door-open { fill: #fdf3e3; }
+.ca-door-light { fill: #fff3cf; }
+.ca-belt { fill: #e3d2bd; }
+.ca-divide { fill: none; stroke: #c3b8ec; stroke-width: 6; stroke-linecap: round; }
+.ca-question { font-size: 44px; font-weight: 700; fill: #b49ad8; }
+.ca-equals { font-size: 26px; font-weight: 700; fill: #b49ad8; }
+.ca-tag { fill: #fffdf7; stroke: #ead9c8; stroke-width: 2; }
+.ca-tag-text { font-size: 16px; font-weight: 600; fill: #7a6455; }
+.ca-grass { fill: #cfe9b8; }
+.ca-trunk { fill: #c79a72; }
+.ca-crown { fill: #b5e394; }
+.ca-crown-2 { fill: #a8e0cf; }
+.ca-stone { fill: #fbeec2; }
+.ca-bowl { fill: #fffdf7; stroke: #ead9c8; stroke-width: 3; }
+.ca-backpack { fill: #a5d3ef; }
+.ca-backpack-flap { fill: #f9d976; }
+.ca-mask { fill: #dcecf7; stroke: #b9d8ea; stroke-width: 2; }
+.ca-flag { fill: #f4978e; }
+.ca-hair-tuft { fill: none; stroke: #8a6a52; stroke-width: 4; stroke-linecap: round; }
+.ca-peach { fill: #f8c9a4; }
+.ca-teddy { fill: #ead6b8; }
+.ca-steam { fill: none; stroke: #d8e8f4; stroke-width: 5; stroke-linecap: round; }
+.ca-brush { fill: #a5d3ef; }
+.ca-brush-soft { fill: #fffdf7; stroke: #ead9c8; stroke-width: 2; }
+.ca-picc { fill: none; stroke: #a5d3ef; stroke-width: 7; stroke-linecap: round; }
+
+.garden-buddies {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* 画面内部的小动效（漂浮、流动），静态模式和系统减少动效时关闭 */
+
+.ca-flow {
+  animation: comic-pan 2600ms ease-in-out infinite alternate;
+}
+
+.ca-float-slow {
+  animation: comic-float 3200ms ease-in-out infinite alternate;
+}
+
+.ca-pulse-group {
+  transform-origin: 200px 140px;
+  animation: comic-pulse 2400ms ease-in-out infinite alternate;
+}
+
+.comic.is-paused .ca-flow,
+.comic.is-paused .ca-float-slow,
+.comic.is-paused .ca-pulse-group {
+  animation-play-state: paused;
+}
+
+.comic.is-static .ca-flow,
+.comic.is-static .ca-float-slow,
+.comic.is-static .ca-pulse-group,
+html[data-motion="reduce"] .ca-flow,
+html[data-motion="reduce"] .ca-float-slow,
+html[data-motion="reduce"] .ca-pulse-group {
+  animation: none !important;
+}

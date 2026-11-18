@@ -1,28 +1,18 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { DemoBanner } from "@/src/components/DemoBanner";
-import { SiteHeader } from "@/src/components/SiteHeader";
-import { AssistantLauncher, AssistantPanel } from "@/src/components/AssistantPanel";
-import { AssistantProvider } from "@/src/features/assistant/AssistantContext";
-import { DocumentsProvider } from "@/src/features/documents/DocumentsContext";
-import { LedgerProvider } from "@/src/features/ledger/LedgerContext";
-import { PlaceProvider } from "@/src/features/place/PlaceContext";
-import { AidRuleProvider } from "@/src/features/prepare/AidRuleContext";
-import { PrepareStateProvider } from "@/src/features/prepare/PrepareStateContext";
-import { DemoWorkspaceLoader } from "@/src/features/workspace/DemoWorkspaceLoader";
-import { useWorkspace, WorkspaceProvider } from "@/src/features/workspace/WorkspaceContext";
+import { SiteHeader } from "@/src/components/story/SiteHeader";
+import { SiteTabBar } from "@/src/components/story/SiteTabBar";
 import { scrollToElement } from "@/src/lib/scrollToElement";
+import { SITE_NAME } from "@/src/lib/usePageTitle";
 
-const HomePage = lazy(() => import("@/src/pages/HomePage"));
-const LearnPage = lazy(() => import("@/src/pages/LearnPage"));
-const RoutePage = lazy(() => import("@/src/pages/RoutePage"));
-const ReceiptsPage = lazy(() => import("@/src/pages/ReceiptsPage"));
-const LedgerPage = lazy(() => import("@/src/pages/LedgerPage"));
-const CheckPage = lazy(() => import("@/src/pages/CheckPage"));
-const PreparePage = lazy(() => import("@/src/pages/PreparePage"));
-const StoriesPage = lazy(() => import("@/src/pages/StoriesPage"));
-const FundraisingPage = lazy(() => import("@/src/pages/FundraisingPage"));
-const AboutPage = lazy(() => import("@/src/pages/AboutPage"));
+const MapPage = lazy(() => import("@/src/pages/MapPage"));
+const ChapterPage = lazy(() => import("@/src/pages/ChapterPage"));
+const ExplorePage = lazy(() => import("@/src/pages/ExplorePage"));
+const PeersPage = lazy(() => import("@/src/pages/PeersPage"));
+const RecoveryPage = lazy(() => import("@/src/pages/RecoveryPage"));
+const FeelingsPage = lazy(() => import("@/src/pages/FeelingsPage"));
+const WordsPage = lazy(() => import("@/src/pages/WordsPage"));
+const GrownUpsPage = lazy(() => import("@/src/pages/GrownUpsPage"));
 
 function ScrollToAnchor() {
   const { pathname, hash } = useLocation();
@@ -56,78 +46,52 @@ function ScrollToAnchor() {
   return null;
 }
 
-function WorkspaceRoutes() {
-  const { mode } = useWorkspace();
-
-  return (
-    <Suspense
-      fallback={
-        <p className="route-loading" role="status">
-          正在打开页面…
-        </p>
-      }
-    >
-      <Routes key={mode}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/learn" element={<LearnPage />} />
-        <Route path="/resources" element={<Navigate to="/route" replace />} />
-        <Route path="/route" element={<RoutePage />} />
-        <Route path="/receipts" element={<ReceiptsPage />} />
-        <Route path="/ledger" element={<LedgerPage />} />
-        <Route path="/check" element={<CheckPage />} />
-        <Route path="/prepare" element={<PreparePage />} />
-        <Route path="/stories" element={<StoriesPage />} />
-        <Route path="/fundraising" element={<FundraisingPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
-  );
-}
-
 export default function App() {
   return (
-    <AssistantProvider>
-      <WorkspaceProvider>
-        <PlaceProvider>
-        <AidRuleProvider>
-        <DocumentsProvider>
-          <LedgerProvider>
-            <PrepareStateProvider>
-            <DemoWorkspaceLoader />
-            <a
-              className="skip-link"
-              href="#main-content"
-              onClick={(event) => {
-                event.preventDefault();
-                document.getElementById("main-content")?.focus();
-              }}
-            >
-              跳到主要内容
-            </a>
-            <ScrollToAnchor />
-            <div className="site-shell">
-              <SiteHeader />
-              <DemoBanner />
-              <main id="main-content" className="site-main" tabIndex={-1}>
-                <WorkspaceRoutes />
-              </main>
-              <footer className="site-footer">
-                <div className="site-footer__inner">
-                  <span>儿童白血病就医资料夹</span>
-                  <span>文件在本机处理 · 公开政策以来源原文为准</span>
-                  <Link to="/about">资料来源与说明</Link>
-                </div>
-              </footer>
-              <AssistantLauncher />
-              <AssistantPanel />
-            </div>
-          </PrepareStateProvider>
-        </LedgerProvider>
-      </DocumentsProvider>
-        </AidRuleProvider>
-        </PlaceProvider>
-    </WorkspaceProvider>
-  </AssistantProvider>
+    <>
+      <a
+        className="skip-link"
+        href="#main-content"
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById("main-content")?.focus();
+        }}
+      >
+        跳到主要内容
+      </a>
+      <ScrollToAnchor />
+      <div className="site-shell">
+        <SiteHeader />
+        <main id="main-content" className="site-main" tabIndex={-1}>
+          <Suspense
+            fallback={
+              <p className="route-loading" role="status">
+                正在打开…
+              </p>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<MapPage />} />
+              <Route path="/story/:id" element={<ChapterPage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+              <Route path="/stories" element={<PeersPage />} />
+              <Route path="/recovery" element={<RecoveryPage />} />
+              <Route path="/feelings" element={<FeelingsPage />} />
+              <Route path="/words" element={<WordsPage />} />
+              <Route path="/grown-ups" element={<GrownUpsPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </main>
+        <SiteTabBar />
+        <footer className="site-footer">
+          <div className="site-footer__inner">
+            <span>{SITE_NAME} · 讲给孩子听的白血病</span>
+            <Link to="/words">词语卡</Link>
+            <Link to="/grown-ups">来源与说明</Link>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
