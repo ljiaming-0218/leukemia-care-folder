@@ -1,22 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "../vendor/shadcn-tailwind-4.13.0.css";
-
-@utility scrollbar-thin {
-  scrollbar-width: thin;
-}
-
-@utility scrollbar-none {
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-@utility scrollbar-gutter-stable {
-  scrollbar-gutter: stable;
-}
 
 :root {
   color-scheme: light;
@@ -117,41 +99,6 @@
     --site-shadow: 0 1px 2px rgb(0 0 0 / 22%);
     --site-shadow-lift: 0 8px 22px -16px rgb(0 0 0 / 70%);
   }
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --font-sans: var(--site-font);
-  --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 3px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --spacing: calc(0.25rem * var(--site-space));
-  --text-xs: calc(0.75rem * var(--site-type));
-  --text-sm: calc(0.875rem * var(--site-type));
-  --text-base: calc(1rem * var(--site-type));
-  --text-lg: calc(1.125rem * var(--site-type));
-  --text-xl: calc(1.25rem * var(--site-type));
-  --text-2xl: calc(1.5rem * var(--site-type));
-  --text-3xl: calc(1.875rem * var(--site-type));
-  --default-transition-duration: calc(160ms * var(--site-motion));
 }
 
 * {

@@ -31,4 +31,23 @@ describe("story content", () => {
     const kidText = [...chapters.flatMap((chapter) => chapter.kidText), ...words.map((word) => word.kid)].join("\n");
     expect(kidText).not.toMatch(/\d+\s*%|治愈率|生存率|mg|毫克/);
   });
+
+  it("gives both age bands a parent script for every chapter", () => {
+    for (const chapter of chapters) {
+      const bands = chapter.grownUp.scripts.map((script) => script.ageBand).sort();
+      expect(bands).toEqual(["6-8", "9-12"]);
+      for (const script of chapter.grownUp.scripts) {
+        expect(script.say.length).toBeGreaterThanOrEqual(2);
+        expect(script.say.every((line) => line.trim().length > 0)).toBe(true);
+        expect(script.avoid.length).toBeGreaterThanOrEqual(1);
+      }
+    }
+  });
+
+  it("keeps parent scripts free of promises and prognosis", () => {
+    const say = chapters
+      .flatMap((chapter) => chapter.grownUp.scripts.flatMap((script) => script.say))
+      .join("\n");
+    expect(say).not.toMatch(/治愈|保证|一定能|很快就好|生存率|复发率|\d+\s*%/);
+  });
 });

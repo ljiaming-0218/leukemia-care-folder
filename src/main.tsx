@@ -7,6 +7,7 @@ import "./globals.css";
 import "./story.css";
 import "./comic.css";
 import "./explore.css";
+import "./patrol.css";
 import "./community.css";
 import "./ui.css";
 

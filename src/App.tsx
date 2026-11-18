@@ -13,6 +13,9 @@ const RecoveryPage = lazy(() => import("@/src/pages/RecoveryPage"));
 const FeelingsPage = lazy(() => import("@/src/pages/FeelingsPage"));
 const WordsPage = lazy(() => import("@/src/pages/WordsPage"));
 const GrownUpsPage = lazy(() => import("@/src/pages/GrownUpsPage"));
+const SchoolPage = lazy(() => import("@/src/pages/SchoolPage"));
+const CheckupPage = lazy(() => import("@/src/pages/CheckupPage"));
+const PatrolGamePage = lazy(() => import("@/src/pages/PatrolGamePage"));
 
 function ScrollToAnchor() {
   const { pathname, hash } = useLocation();
@@ -79,6 +82,9 @@ export default function App() {
               <Route path="/feelings" element={<FeelingsPage />} />
               <Route path="/words" element={<WordsPage />} />
               <Route path="/grown-ups" element={<GrownUpsPage />} />
+              <Route path="/school" element={<SchoolPage />} />
+              <Route path="/checkup" element={<CheckupPage />} />
+              <Route path="/game/patrol" element={<PatrolGamePage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

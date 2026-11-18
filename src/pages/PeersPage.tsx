@@ -320,6 +320,16 @@ export default function PeersPage() {
         )}
       </div>
 
+      <aside className="cross-link print-hide">
+        <div>
+          <p className="cross-link__title">孩子准备返校？</p>
+          <p>给老师和同学的一页纸，可以打印或转发给学校。</p>
+        </div>
+        <Link to="/school" className="text-button">
+          打开学校一页纸
+        </Link>
+      </aside>
+
       <p className="page-note">
         每篇故事都来自公开报道，未成年人姓名、具体地点和精确日期已做去标识化处理。
       </p>

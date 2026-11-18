@@ -156,6 +156,12 @@ export default function ExplorePage() {
         ))}
       </div>
 
+      {(scene.id === "vessel-highway" || scene.id === "shield-camp") && (
+        <p className="explore-note">
+          想帮白细胞练习拦病菌？<Link to="/game/patrol">去走巡逻小路</Link>。
+        </p>
+      )}
+
       {show3D && reduced && (
         <p className="explore-note">系统开启了「减少动态效果」，所以 3D 里的小动画会暂停，但场景仍然可以拖动和点击。想恢复漂浮，点页头的「动画」。</p>
       )}

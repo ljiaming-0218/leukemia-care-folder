@@ -7,6 +7,12 @@ const sourceIds = sources.map((source) => source.id) as [string, ...string[]];
 const feelingIds = [...FEELING_TOOL_IDS] as [string, ...string[]];
 const recoveryIds = recoveryTips.map((tip) => tip.id) as [string, ...string[]];
 
+const parentScriptSchema = z.object({
+  ageBand: z.enum(["6-8", "9-12"]),
+  say: z.array(z.string().min(1)).min(2),
+  avoid: z.array(z.string().min(1)).min(1),
+});
+
 export const chapterSchema = z.object({
   id: z.string().regex(/^[a-z-]+$/),
   number: z.number().int().positive(),
@@ -19,6 +25,7 @@ export const chapterSchema = z.object({
   grownUp: z.object({
     points: z.array(z.string().min(1)).min(1),
     boundary: z.string().min(1),
+    scripts: z.array(parentScriptSchema).length(2),
   }),
   sourceIds: z.array(z.enum(sourceIds)).min(1),
   feelingToolIds: z.array(z.enum(feelingIds)),
@@ -52,6 +59,25 @@ const rawChapters: Chapter[] = [
         "化疗期间医院会经常查血常规，看的就是这几类细胞的数量。孩子以后听到「白细胞低」「血小板低」，可以回到这一章找对应的小帮手。",
       ],
       boundary: "血常规里的数值是否正常、要不要处理，请问主治医生。",
+      scripts: [
+        {
+          ageBand: "6-8",
+          say: [
+            "你的血里有三种小帮手：送氧气的、打病菌的、帮止血的。",
+            "抽血是看看小帮手够不够，不是惩罚你。",
+          ],
+          avoid: ["不说「你血不好，所以总生病」。"],
+        },
+        {
+          ageBand: "9-12",
+          say: [
+            "红细胞送氧气，白细胞抗感染，血小板帮凝血。",
+            "治疗时常查血常规，就是看这三类细胞的数量。",
+            "数字高低代表什么，我们一起问医生。",
+          ],
+          avoid: ["不自己解释化验单上的箭头和数值。"],
+        },
+      ],
     },
     sourceIds: ["stjude-leukemia", "all-pathway"],
     feelingToolIds: ["weather", "courage-sticker"],
@@ -77,6 +103,25 @@ const rawChapters: Chapter[] = [
         "动画里「细胞长大再出厂」对应原文：血细胞在骨髓中由干细胞分化成熟为红细胞、白细胞和血小板。",
       ],
       boundary: "动画帮助理解细胞的工作。",
+      scripts: [
+        {
+          ageBand: "6-8",
+          say: [
+            "血细胞住在骨头里一个软软的地方，叫骨髓。",
+            "它们像小宝宝一样，在骨髓里长大，再出来工作。",
+          ],
+          avoid: ["不说「你的骨头坏掉了」。"],
+        },
+        {
+          ageBand: "9-12",
+          say: [
+            "骨髓里的干细胞会慢慢长成红细胞、白细胞和血小板。",
+            "医生看骨髓，是想知道工厂里哪一步出了问题。",
+            "检查怎么做、结果怎么看，由医生结合整体情况判断。",
+          ],
+          avoid: ["不把骨髓检查说成「抽骨头」来吓孩子。"],
+        },
+      ],
     },
     sourceIds: ["stjude-leukemia", "stjude-bone-marrow", "sciping-leukemia"],
     feelingToolIds: ["weather"],
@@ -103,6 +148,26 @@ const rawChapters: Chapter[] = [
         "圣犹达的家长指南提醒：孩子遇到困难时往往会责怪自己，需要明确告诉他们这不是他们的错，癌症也不会传染。可以用「有些孩子会以为……」开头，问孩子是不是也这样想。",
       ],
       boundary: "乏力、易出血、发热、骨痛是细胞变少时可能出现的表现，具体原因和轻重由医生检查判断。",
+      scripts: [
+        {
+          ageBand: "6-8",
+          say: [
+            "细胞长大时出了个小差错，不是你做错了什么。",
+            "这个病不会传染，你可以和朋友一起玩。",
+            "你难过的时候，可以告诉爸爸妈妈。",
+          ],
+          avoid: ["不说「都是因为你……」。"],
+        },
+        {
+          ageBand: "9-12",
+          say: [
+            "白血病是造血细胞在发育中出了错，和你的行为没有关系。",
+            "它不会通过上课、吃饭或玩耍传染给别人。",
+            "有些孩子会偷偷怪自己，你可以直接问我们。",
+          ],
+          avoid: ["不说「你要坚强，别想太多」堵住孩子的提问。"],
+        },
+      ],
     },
     sourceIds: ["stjude-leukemia", "stjude-what-is-cancer", "stjude-talking"],
     feelingToolIds: ["not-your-fault", "weather"],
@@ -131,6 +196,26 @@ const rawChapters: Chapter[] = [
         "腰穿取脑脊液，用来判断中枢神经系统是否受累；同一操作中也可能做鞘内注射。术后体位和观察按治疗医院的宣教执行。",
       ],
       boundary: "每家医院的麻醉方式和流程可能不同，以医院宣教为准。",
+      scripts: [
+        {
+          ageBand: "6-8",
+          say: [
+            "医生要取一点点血或骨髓，像侦探找线索。",
+            "检查可能会有点害怕，你可以叫我们陪着你。",
+            "做完检查，身体会慢慢补回来。",
+          ],
+          avoid: ["不骗孩子「一点都不疼」。"],
+        },
+        {
+          ageBand: "9-12",
+          say: [
+            "血常规、骨穿、腰穿查的是不同的问题。",
+            "骨穿取一点点骨髓样本，腰穿取一点脑脊液。医生会提前告诉你们从哪里取、怎么做。",
+            "每一步怎么做，我们提前问清楚，再一起准备。",
+          ],
+          avoid: ["不承诺「做完这次就再也不用查了」。"],
+        },
+      ],
     },
     sourceIds: ["stjude-bone-marrow", "nhc-all-apl", "all-pathway"],
     feelingToolIds: ["question-card", "breathing"],
@@ -158,6 +243,26 @@ const rawChapters: Chapter[] = [
         "PICC 从手臂静脉置入；输液港完全埋在皮下，需要时用专用针连接。维护、洗澡和异常情况按医院护士宣教处理。",
       ],
       boundary: "孩子的方案以主治医生为准。",
+      scripts: [
+        {
+          ageBand: "6-8",
+          say: [
+            "治疗像长跑，一段一段来，我们会陪着你。",
+            "掉头发是药的影响，以后还会长出来。",
+            "累了就说，我们可以停下来休息。",
+          ],
+          avoid: ["不说「忍一忍就过去了」。"],
+        },
+        {
+          ageBand: "9-12",
+          say: [
+            "治疗分诱导、巩固、维持等阶段，每个人的安排不一样。",
+            "化疗会攻击长得快的细胞，头发也可能暂时脱落。",
+            "具体方案和每一步要多久，以你的医生安排为准。",
+          ],
+          avoid: ["不拿别人的疗程给孩子做比较。"],
+        },
+      ],
     },
     sourceIds: ["stjude-leukemia", "all-pathway", "stjude-hair-loss"],
     feelingToolIds: ["courage-sticker", "breathing"],
@@ -183,6 +288,26 @@ const rawChapters: Chapter[] = [
         "首都儿科研究所的居家建议：家长戴口罩并定时更换，接触孩子前洗手；用软毛牙刷；白细胞或中性粒细胞低时水果要加工至熟透；不养小动物、室内不摆放植物、不给孩子玩毛绒玩具；定时开窗通风。",
       ],
       boundary: "多少度算发热、什么时候必须回医院，以治疗医院给你的书面要求为准。",
+      scripts: [
+        {
+          ageBand: "6-8",
+          say: [
+            "白细胞变少时，病菌容易靠近，我们要勤洗手。",
+            "发烧、发冷要马上告诉大人，不要等到明天。",
+            "戴口罩、吃熟的食物，是在保护你。",
+          ],
+          avoid: ["不说「你怎么又生病了」。"],
+        },
+        {
+          ageBand: "9-12",
+          say: [
+            "治疗期间白细胞可能下降，感染风险会增加。",
+            "发烧或发冷要立即联系治疗团队，按医院要求处理。",
+            "不自己吃退烧药或抗生素，先问医生。",
+          ],
+          avoid: ["不根据体温自己决定要不要去医院。"],
+        },
+      ],
     },
     sourceIds: ["stjude-fever", "sciping-leukemia"],
     feelingToolIds: ["courage-sticker"],
@@ -211,6 +336,26 @@ const rawChapters: Chapter[] = [
       ],
       boundary:
         "返校时间和方式因治疗阶段和孩子状态差异很大，请以治疗团队的意见为准。",
+      scripts: [
+        {
+          ageBand: "6-8",
+          say: [
+            "白血病不会传染，同学可以和你一起上课、一起玩。",
+            "你累了可以休息，不用一下子回到以前的节奏。",
+            "同学问问题，你可以回答，也可以说「我现在不想说」。",
+          ],
+          avoid: ["不逼孩子「什么都跟同学讲清楚」。"],
+        },
+        {
+          ageBand: "9-12",
+          say: [
+            "返校可以分阶段，先半天或先上喜欢的课，再慢慢增加。",
+            "同学可能好奇头发和体力，你可以先想好一两句。",
+            "什么时候返校、能参加什么活动，和治疗团队、学校一起商量。",
+          ],
+          avoid: ["不承诺「下周就能完全跟上」。"],
+        },
+      ],
     },
     sourceIds: ["stjude-talking"],
     feelingToolIds: ["school-theater", "sibling"],
@@ -239,6 +384,26 @@ const rawChapters: Chapter[] = [
       ],
       boundary:
         "随访的时间、项目和频率，以孩子所在治疗团队的安排为准。",
+      scripts: [
+        {
+          ageBand: "6-8",
+          say: [
+            "治疗结束以后，还要按时回医院看看。",
+            "复查是看看身体长得好不好，不是因为你做错了什么。",
+            "如果还没到复查就不舒服，也要告诉大人。",
+          ],
+          avoid: ["不说「再也不用来医院了」。"],
+        },
+        {
+          ageBand: "9-12",
+          say: [
+            "治疗结束后仍需定期随访，检查生长发育和身体功能。",
+            "复查间隔通常会按安排调整，具体时间看复查单。",
+            "把平时的问题记下来，复查时一起问医生。",
+          ],
+          avoid: ["不自行决定取消或推迟复查。"],
+        },
+      ],
     },
     sourceIds: ["all-pathway", "nhc-all-apl", "stjude-leukemia"],
     feelingToolIds: ["question-card", "sibling"],

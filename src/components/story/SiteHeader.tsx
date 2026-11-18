@@ -7,6 +7,7 @@ import { SITE_NAME } from "@/src/lib/usePageTitle";
 const NAV = [
   { to: "/", label: "故事地图", end: true },
   { to: "/explore", label: "身体探险", end: false },
+  { to: "/game/patrol", label: "小游戏", end: false },
   { to: "/stories", label: "同路人", end: false },
   { to: "/recovery", label: "康复建议", end: false },
   { to: "/feelings", label: "心里话", end: false },

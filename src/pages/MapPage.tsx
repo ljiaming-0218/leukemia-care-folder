@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { CellBuddy } from "@/src/components/story/CellBuddy";
 import { chapterIcon } from "@/src/components/story/chapterIcon";
+import { EmergencyNote } from "@/src/components/story/EmergencyNote";
 import { chapters } from "@/src/data/story/chapters";
 import { useStickers } from "@/src/lib/stickers";
 import { usePageTitle } from "@/src/lib/usePageTitle";
@@ -107,6 +108,13 @@ export default function MapPage() {
               <span>医院里的新词，翻面看大人版</span>
             </span>
           </Link>
+          <Link to="/game/patrol" className="more-card">
+            <CellBuddy kind="white" size={44} title="" />
+            <span>
+              <strong>巡逻小路</strong>
+              <span>帮白细胞练习拦病菌</span>
+            </span>
+          </Link>
           <Link to="/grown-ups" className="more-card">
             <CellBuddy kind="red" size={44} title="" />
             <span>
@@ -116,6 +124,8 @@ export default function MapPage() {
           </Link>
         </div>
       </section>
+
+      <EmergencyNote />
 
       <p className="page-note">
         这里讲的是常见情况，用来帮助理解。每个小朋友的检查和治疗都不一样，一切听自己医生的。

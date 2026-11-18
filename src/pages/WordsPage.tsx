@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { CellBuddy } from "@/src/components/story/CellBuddy";
 import { Scene3DBoundary } from "@/src/components/three/Scene3DBoundary";
 import { detectWebGL } from "@/src/components/three/webgl";
@@ -34,6 +34,7 @@ export default function WordsPage() {
   const [flipped, setFlipped] = useState<Set<string>>(new Set());
   const [powerSaving, setPowerSaving] = useState(readPowerSaving);
   const [scrollTick, setScrollTick] = useState(0);
+  const { hash } = useLocation();
   const [page, setPage] = useState(0);
   const [announce, setAnnounce] = useState("");
   const motion = useMotion();
@@ -41,14 +42,6 @@ export default function WordsPage() {
   const webgl = useMemo(() => detectWebGL(), []);
   const show3D = webgl && !powerSaving;
   const detailRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(POWER_KEY, powerSaving ? "on" : "off");
-    } catch {
-      // The preference simply stays in memory when storage is unavailable.
-    }
-  }, [powerSaving]);
 
   useEffect(() => {
     setPage(0);
@@ -154,6 +147,27 @@ export default function WordsPage() {
     setSelectedId(id);
     if (next && withAnnouncement) setAnnounce(`已选中「${next.term}」`);
     setScrollTick((tick) => tick + 1);
+  }
+
+  useEffect(() => {
+    const id = hash.slice(1);
+    if (!id) return;
+    const word = words.find((item) => item.id === id);
+    if (!word) return;
+    setQuery("");
+    setChapterFilter("all");
+    setSelectedId(id);
+    setScrollTick((tick) => tick + 1);
+  }, [hash]);
+
+  function togglePowerSaving() {
+    const next = !powerSaving;
+    setPowerSaving(next);
+    try {
+      localStorage.setItem(POWER_KEY, next ? "on" : "off");
+    } catch {
+      // The preference simply stays in memory when storage is unavailable.
+    }
   }
 
   function goPage(next: number) {
@@ -342,7 +356,7 @@ export default function WordsPage() {
               type="button"
               className="text-button"
               aria-pressed={powerSaving}
-              onClick={() => setPowerSaving((current) => !current)}
+              onClick={togglePowerSaving}
             >
               {powerSaving ? "打开 3D 星图" : "改用文字索引（省电）"}
             </button>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { RecoveryGarden } from "@/src/components/recovery/RecoveryGarden";
 import {
   RecoveryGraph,
@@ -27,6 +27,7 @@ export default function RecoveryPage() {
   const [category, setCategory] = useState<RecoveryCategoryFilter>("全部分类");
   const [stage, setStage] = useState<RecoveryStageFilter>("全部阶段");
   const [view, setView] = useState<View>("graph");
+  const { hash } = useLocation();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const isSplit = useMediaQuery("(min-width: 1280px)");
   const detailRef = useRef<HTMLElement>(null);
@@ -49,6 +50,19 @@ export default function RecoveryPage() {
           ? `当前阶段 ${stage} · ${tips.length} 个主题`
           : `${recoveryTips.length} 个主题 · ${RECOVERY_STAGES.length} 个阶段`
       : `当前有 ${tips.length} 张建议卡`;
+
+  useEffect(() => {
+    const id = hash.slice(1);
+    if (!id) {
+      setCategory("全部分类");
+      setStage("全部阶段");
+      return;
+    }
+    const tip = recoveryTips.find((item) => item.id === id);
+    if (!tip) return;
+    setCategory(tip.category);
+    setStage("全部阶段");
+  }, [hash]);
 
   useEffect(() => {
     if (!shouldScrollToDetail.current || isSplit || !selectedTip) return;
@@ -114,6 +128,16 @@ export default function RecoveryPage() {
         </div>
         <RecoveryGarden />
       </header>
+
+      <aside className="cross-link print-hide">
+        <div>
+          <p className="cross-link__title">要去复诊？</p>
+          <p>把想问的问题和这阵子观察到的情况整理成一页，打印或截屏带去。</p>
+        </div>
+        <Link to="/checkup" className="text-button">
+          打开复诊清单
+        </Link>
+      </aside>
 
       <section className="recovery-filters" aria-label="筛选康复建议">
         <div className="recovery-filters__head">

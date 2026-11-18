@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FeelingPicker } from "@/src/components/feelings/FeelingPicker";
 import { FeelingsToolbox } from "@/src/components/feelings/FeelingsToolbox";
 import { GrownUpFeelings } from "@/src/components/feelings/GrownUpFeelings";
@@ -16,6 +16,7 @@ import {
   type FeelingToolId,
 } from "@/src/data/feelings/feelings";
 import { usePageTitle } from "@/src/lib/usePageTitle";
+import { readCheckupDraft, saveCheckupDraft } from "@/src/lib/checkup";
 
 type Audience = "kid" | "adult";
 
@@ -24,6 +25,7 @@ export default function FeelingsPage() {
   const tools = useMemo(() => new Map<string, (typeof feelingTools)[number]>(feelingTools.map((tool) => [tool.id, tool])), []);
   const tool = (id: FeelingToolId) => tools.get(id)!;
 
+  const { hash } = useLocation();
   const [activeTool, setActiveTool] = useState<FeelingToolId>("weather");
   const [feelingId, setFeelingId] = useState<FeelingEntryId | null>(null);
   const [audience, setAudience] = useState<Audience>("kid");
@@ -45,6 +47,21 @@ export default function FeelingsPage() {
   const activeToolMeta = tool(activeTool);
   const feelingEntry = feelingId ? FEELING_ENTRIES.find((item) => item.id === feelingId) ?? null : null;
   const weatherLine = WEATHER_OPTIONS.find((item) => item.id === weather)?.line;
+
+  useEffect(() => {
+    const match = hash.match(/^#feelings-([a-z-]+)$/);
+    const toolId = match?.[1];
+    if (!toolId || !tools.has(toolId)) return;
+    setAudience("kid");
+    setFeelingId(null);
+    setActiveTool(toolId as FeelingToolId);
+    window.requestAnimationFrame(() => {
+      document.getElementById("feelings-panel")?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  }, [hash, tools]);
 
   useEffect(() => {
     if (!running) return;
@@ -298,6 +315,18 @@ export default function FeelingsPage() {
               <button type="button" className="text-button" onClick={() => window.print()}>
                 打印
               </button>
+              <Link
+                to="/checkup"
+                className="text-button"
+                onClick={() => {
+                  const filled = questions.map((question) => question.trim()).filter(Boolean);
+                  if (!filled.length) return;
+                  const current = readCheckupDraft();
+                  saveCheckupDraft({ ...current, questions: filled });
+                }}
+              >
+                整理成复诊清单
+              </Link>
             </div>
             {copyState !== "idle" && (
               <p className="feeling-feedback" role="status">
@@ -467,7 +496,9 @@ export default function FeelingsPage() {
         <GrownUpFeelings onBack={returnToTools} />
       )}
 
-      <p className="page-note">所有选择和输入只留在当前页面，刷新就清空。</p>
+      <p className="page-note">
+        所有选择和输入默认只留在当前页面，刷新就清空；只有点「整理成复诊清单」时，问题才会写入当前标签页的复诊草稿。
+      </p>
     </div>
   );
 }

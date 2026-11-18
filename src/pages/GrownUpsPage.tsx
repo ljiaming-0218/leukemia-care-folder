@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CellBuddy } from "@/src/components/story/CellBuddy";
+import { EmergencyNote } from "@/src/components/story/EmergencyNote";
 import { SourceList } from "@/src/components/story/SourceList";
 import { sources, type SourceId } from "@/src/data/story/sources";
 import { clearAsked, useAskedDoctor } from "@/src/lib/askedDoctor";
@@ -10,6 +12,16 @@ export default function GrownUpsPage() {
   usePageTitle("大人看这里");
   const stickers = useStickers();
   const asked = useAskedDoctor();
+  const [notice, setNotice] = useState("");
+
+  function clearProgress() {
+    try {
+      localStorage.removeItem("marrow-factory:comic-progress");
+      setNotice("阅读进度已清空。");
+    } catch {
+      setNotice("这台设备暂时无法清除阅读进度。");
+    }
+  }
 
   return (
     <div className="page page--grownups">
@@ -54,6 +66,8 @@ export default function GrownUpsPage() {
         </p>
       </section>
 
+      <EmergencyNote />
+
       <section className="info-block" aria-labelledby="community-title">
         <h2 id="community-title">同路人、康复和心里话</h2>
         <ul>
@@ -69,15 +83,26 @@ export default function GrownUpsPage() {
             <Link to="/feelings">心里话</Link>
             孩子情绪持续低落、拒绝治疗或出现自伤言语时，请联系治疗团队或专业心理人员。
           </li>
+          <li>
+            <Link to="/school">学校一页纸</Link>
+            给老师和同学的返校沟通页，可以打印或转发。
+          </li>
+          <li>
+            <Link to="/checkup">复诊清单</Link>
+            把想问的问题和观察到的情况整理成一页，带去复诊。
+          </li>
         </ul>
       </section>
 
       <section className="info-block" aria-labelledby="privacy-title">
         <h2 id="privacy-title">隐私</h2>
         <p>
-          网站不需要登录，不收集个人信息，也没有统计代码。保存在这台设备上的只有：孩子收集了哪几张贴纸（只有章节和场景编号），以及家长在康复卡片上勾选的「已经问过医生」（只有卡片编号）。情绪选择、问题卡和手足留言只留在当前页面，刷新就清空。
+          网站不需要登录，不收集个人信息，也没有统计代码。长期保存在这台设备上的只有：读到第几格漫画、收集了哪几张贴纸（只有章节和场景编号）、家长勾选的「已经问过医生」（只有卡片编号），以及声音、动画、省电模式的开关。它们都不包含姓名、年龄、医院或联系方式。情绪选择、问题卡和手足留言默认只留在当前页面，刷新就清空；复诊清单只存在当前标签页，关闭标签页就清空。
         </p>
         <div className="button-row">
+          <button type="button" className="text-button" onClick={clearProgress}>
+            清空阅读进度
+          </button>
           <button type="button" className="text-button" disabled={stickers.length === 0} onClick={clearStickers}>
             {stickers.length ? `清空贴纸记录（${stickers.length} 张）` : "没有贴纸记录"}
           </button>
@@ -85,6 +110,9 @@ export default function GrownUpsPage() {
             {asked.length ? `清空「已问过医生」标记（${asked.length} 条）` : "没有问诊标记"}
           </button>
         </div>
+        <p className="page-note" role="status" aria-live="polite">
+          {notice}
+        </p>
       </section>
 
       <section className="info-block" aria-labelledby="sources-title">

@@ -8,6 +8,5 @@ dist/
 .qoder-sites/
 .qoder-sites.json
 
-# local test artifacts and duplicate OCR downloads
+# local test artifacts
 .tmp/
-*.traineddata

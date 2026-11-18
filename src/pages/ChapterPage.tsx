@@ -2,6 +2,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { ComicReader } from "@/src/components/comic/ComicReader";
 import { CellBuddy } from "@/src/components/story/CellBuddy";
 import { chapterIcon } from "@/src/components/story/chapterIcon";
+import { EmergencyNote } from "@/src/components/story/EmergencyNote";
 import { Scene } from "@/src/components/story/Scene";
 import { SourceList } from "@/src/components/story/SourceList";
 import { chapters, getChapter } from "@/src/data/story/chapters";
@@ -97,6 +98,13 @@ export default function ChapterPage() {
                 进身体看看（3D）
               </Link>
             )}
+            {chapter.id === "shield" && (
+              <p className="scene-box__game">
+                <Link to="/game/patrol" className="text-button">
+                  玩一局：巡逻小路（白细胞拦病菌）
+                </Link>
+              </p>
+            )}
           </section>
 
           <section className="remember" id="chapter-remember" aria-labelledby="remember-title">
@@ -161,9 +169,37 @@ export default function ChapterPage() {
               ))}
             </ul>
             <p className="grown-up-box__boundary">{chapter.grownUp.boundary}</p>
+            <div className="grown-up-scripts">
+              <h3>可以这样说</h3>
+              {chapter.grownUp.scripts.map((script) => (
+                <div key={script.ageBand} className="grown-up-script">
+                  <p className="grown-up-script__band">{script.ageBand === "6-8" ? "6–8 岁" : "9–12 岁"}</p>
+                  <ul>
+                    {script.say.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                  <p className="grown-up-script__avoid">注意：{script.avoid.join("；")}</p>
+                </div>
+              ))}
+            </div>
             <h3>来源</h3>
             <SourceList ids={chapter.sourceIds} />
           </details>
+
+          {chapter.id === "school" && (
+            <aside className="school-teaser" aria-labelledby="school-teaser-title">
+              <div>
+                <h2 id="school-teaser-title">给老师和同学的一页纸</h2>
+                <p>可以打印或转发给学校，帮助大家知道白血病不传染、怎么相处。</p>
+              </div>
+              <Link to="/school" className="text-button">
+                打开一页纸
+              </Link>
+            </aside>
+          )}
+
+          <EmergencyNote />
 
           <nav className="chapter-nav" aria-label="章节翻页">
             {prev ? (
